@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Empathy Lens · PINA A05</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@400;500;600;700&family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0F1729; --surf:#1A2540; --surf2:#243154;
+  --teal:#00D4AA; --copper:#E8845C; --gold:#FFD166;
+  --cream:#F4EBDD; --muted:#8899BB; --line:rgba(244,235,221,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--cream);font-size:16px;line-height:1.5;min-height:100vh}
+.app{max-width:560px;margin:0 auto;padding:24px 18px 60px}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--teal);font-weight:700;text-transform:uppercase;margin-bottom:8px}
+h1{font-family:'Newsreader',serif;font-weight:500;font-size:30px;line-height:1.1;letter-spacing:-.5px;margin-bottom:4px}
+.intro{margin-top:14px;color:var(--muted);font-size:14.5px;line-height:1.55;margin-bottom:28px}
+
+/* Case selector */
+.section-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--copper);text-transform:uppercase;font-weight:700;margin-bottom:12px}
+.case-list{display:flex;flex-direction:column;gap:10px}
+.case-btn{background:var(--surf);border:2px solid transparent;border-radius:12px;padding:16px;text-align:left;color:var(--cream);font-family:inherit;font-size:14.5px;cursor:pointer;transition:all .18s ease;line-height:1.4}
+.case-btn:hover{border-color:var(--teal)}
+.case-btn:active{transform:scale(.985)}
+.case-num{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:5px}
+
+/* Perspective viewer */
+.case-header{background:var(--surf2);border-radius:14px;padding:18px;margin-bottom:20px;border-left:3px solid var(--teal)}
+.case-header .case-num{color:var(--teal)}
+.case-title{font-family:'Newsreader',serif;font-size:20px;font-weight:500;line-height:1.25;margin-bottom:8px}
+.case-summary{font-size:14px;color:var(--muted);line-height:1.5}
+
+.lens-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.tab-btn{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;padding:7px 13px;border-radius:20px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;font-weight:700;text-transform:uppercase}
+.tab-btn.active{background:var(--surf2);color:var(--cream);border-color:var(--copper)}
+.tab-btn:hover:not(.active){border-color:var(--muted)}
+
+.lens-card{background:var(--surf);border-radius:14px;padding:20px;margin-bottom:18px;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.lens-role{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:6px}
+.lens-role.imputato{color:var(--cream)}
+.lens-role.giudice{color:var(--gold)}
+.lens-role.algoritmo{color:var(--teal)}
+.lens-role.difensore{color:var(--copper)}
+.lens-quote{font-family:'Newsreader',serif;font-size:18px;font-style:italic;line-height:1.45;color:var(--cream);margin-bottom:14px}
+.lens-detail{font-size:13.5px;line-height:1.55;color:var(--muted)}
+.lens-detail strong{color:var(--cream);font-weight:600}
+
+/* Convince meter */
+.convince-prompt{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:10px}
+.convince-stars{display:flex;gap:6px;margin-bottom:20px}
+.star-btn{font-size:22px;background:none;border:none;cursor:pointer;opacity:0.25;transition:all .12s;padding:2px}
+.star-btn.lit{opacity:1}
+.star-btn:hover{transform:scale(1.15)}
+
+/* Progress bar for perspectives */
+.progress{display:flex;gap:5px;margin-bottom:18px}
+.progress-dot{flex:1;height:4px;background:var(--surf);border-radius:2px;transition:background .25s}
+.progress-dot.done{background:var(--teal)}
+.progress-dot.current{background:var(--copper)}
+
+/* Nav buttons */
+.nav{display:flex;gap:10px;margin-bottom:24px}
+.btn{flex:1;padding:14px;border-radius:12px;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif}
+.btn-primary{background:var(--teal);color:var(--bg)}
+.btn-primary:active{transform:scale(.97)}
+.btn-ghost{background:var(--surf);color:var(--muted);border:1px solid var(--line)}
+.btn-ghost:active{transform:scale(.97)}
+
+/* Results */
+.results-header{text-align:center;margin-bottom:24px}
+.results-header h2{font-family:'Newsreader',serif;font-size:26px;font-weight:500;margin-bottom:8px}
+.results-header .sub{color:var(--muted);font-size:14px}
+.result-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:14px;background:var(--surf);border-radius:12px}
+.result-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;font-weight:700;min-width:90px}
+.result-bar-wrap{flex:1;background:var(--surf2);border-radius:4px;height:8px;overflow:hidden}
+.result-bar{height:100%;border-radius:4px;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.result-score{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);min-width:30px;text-align:right}
+.insight{background:var(--surf2);border-radius:14px;padding:18px;margin-top:20px;margin-bottom:20px}
+.insight-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;margin-bottom:10px;font-weight:700}
+.insight-text{font-size:14px;line-height:1.6;color:var(--cream)}
+.footer{margin-top:32px;padding-top:18px;border-top:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;text-align:center}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- STEP 0: intro + case selection -->
+<div id="step-0">
+  <div class="eyebrow">PINA · CARD A05 · DISCUSSIONE</div>
+  <h1>Empathy Lens</h1>
+  <div class="intro">Lo stesso caso di decisione algoritmica, visto da quattro prospettive diverse. Leggi, valuta, scopri qual è la voce che ti convince di più.</div>
+  <div class="section-label">Scegli un caso</div>
+  <div class="case-list" id="case-list"></div>
+</div>
+
+<!-- STEP 1: perspective viewer -->
+<div id="step-1" style="display:none">
+  <div class="eyebrow">PINA · CARD A05 · DISCUSSIONE</div>
+  <div id="case-header-slot"></div>
+  <div class="progress" id="progress-bar"></div>
+  <div class="lens-tabs" id="lens-tabs"></div>
+  <div id="lens-content"></div>
+  <div class="convince-prompt">Quanto ti convince questa prospettiva?</div>
+  <div class="convince-stars" id="stars"></div>
+  <div class="nav">
+    <button class="btn btn-ghost" id="btn-prev" onclick="prevLens()">Indietro</button>
+    <button class="btn btn-primary" id="btn-next" onclick="nextLens()">Avanti</button>
+  </div>
+</div>
+
+<!-- STEP 2: results -->
+<div id="step-2" style="display:none">
+  <div class="eyebrow">PINA · CARD A05 · RISULTATI</div>
+  <div class="results-header">
+    <h2>Le tue valutazioni</h2>
+    <div class="sub">Quale prospettiva hai trovato più convincente?</div>
+  </div>
+  <div id="result-rows"></div>
+  <div class="insight" id="insight-box">
+    <div class="insight-label">Per la discussione</div>
+    <div class="insight-text" id="insight-text"></div>
+  </div>
+  <button class="btn btn-ghost" style="width:100%" onclick="restart()">Prova un altro caso</button>
+</div>
+
+<div class="footer">PINA AI LITERACY · ADULT EDITION · A05</div>
+</div>
+
+<script>
+const CASES = [
+  {
+    id: "C1",
+    title: "Eric Loomis",
+    summary: "Wisconsin, 2016. Eric Loomis viene condannato a 6 anni. Parte della sentenza si basa su COMPAS, un algoritmo che lo classifica come «alto rischio di recidiva». Loomis chiede di esaminare il funzionamento dell'algoritmo. La risposta: segreto industriale.",
+    lenses: [
+      {
+        role: "imputato",
+        label: "Eric Loomis",
+        roleClass: "imputato",
+        quote: "«Non so perché mi hanno classificato così. Non posso contestare qualcosa che non mi è permesso vedere.»",
+        detail: "<strong>Cosa dice:</strong> ho diritto di sapere cosa mi ha condannato. Un sistema segreto non può essere la base di una sentenza che mi toglie 6 anni di vita. <strong>Cosa chiede:</strong> trasparenza dell'algoritmo, diritto al ricorso."
+      },
+      {
+        role: "giudice",
+        label: "Il tribunale",
+        roleClass: "giudice",
+        quote: "«L'algoritmo è uno strumento di supporto alla decisione, non la decisione stessa. Il giudice mantiene la discrezionalità.»",
+        detail: "<strong>Argomento:</strong> COMPAS non decide, informa. Il giudice ha valutato molti altri fattori. <strong>Limite:</strong> studi successivi mostrano che i punteggi COMPAS influenzano significativamente le sentenze, anche quando i giudici credono di decidere autonomamente."
+      },
+      {
+        role: "algoritmo",
+        label: "Northpointe (azienda)",
+        roleClass: "algoritmo",
+        quote: "«Il modello è validato statisticamente e protegge il legittimo segreto industriale. Divulgarlo permetterebbe di aggirarlo.»",
+        detail: "<strong>Argomento:</strong> 137 variabili, validato su decine di migliaia di casi. La riservatezza protegge l'integrità del sistema. <strong>Problema documentato:</strong> il modello classificava persone nere come «alto rischio» il doppio delle volte rispetto a persone bianche con la stessa storia penale."
+      },
+      {
+        role: "difensore",
+        label: "Avvocata dei diritti civili",
+        roleClass: "difensore",
+        quote: "«Un algoritmo di black box che decide della libertà delle persone è incostituzionale, a prescindere dalla sua accuratezza statistica.»",
+        detail: "<strong>Principio:</strong> il Sesto Emendamento garantisce il diritto a contestare le prove a proprio carico. Un algoritmo segreto non è contestabile. <strong>Proposta:</strong> audit indipendente obbligatorio, trasparenza per tutti i sistemi usati in contesti penali."
+      }
+    ],
+    insight: "Il caso Loomis non riguarda solo Eric: più di 20 stati USA usano strumenti simili. La domanda chiave non è «l'algoritmo è accurato?» ma «chi può contestarlo, e come?»"
+  },
+  {
+    id: "C2",
+    title: "Il mutuo negato",
+    summary: "Una coppia chiede un mutuo. L'algoritmo nega la richiesta. Il codice postale della loro casa, in un quartiere a maggioranza migrante, è una delle variabili che pesa negativamente. Nessuno glielo dice.",
+    lenses: [
+      {
+        role: "imputato",
+        label: "La coppia",
+        roleClass: "imputato",
+        quote: "«Abbiamo uno stipendio stabile, nessun debito. Ci hanno negato il mutuo senza spiegazione. Il quartiere era l'unica differenza rispetto all'amico che ha ottenuto il mutuo.»",
+        detail: "<strong>Cosa hanno scoperto:</strong> richiedendo i dati via GDPR, hanno visto che il CAP del quartiere aveva un peso elevato nel punteggio di rischio. <strong>Problema:</strong> il CAP è un proxy per etnia — una forma di discriminazione statistica indiretta."
+      },
+      {
+        role: "giudice",
+        label: "La banca",
+        roleClass: "giudice",
+        quote: "«Il modello valuta il rischio statistico in modo oggettivo. Non usa variabili protette come l'etnia — usa i dati finanziari.»",
+        detail: "<strong>Argomento:</strong> il CAP non è etnia, è territorio. Il territorio ha correlazione documentata con tassi di default. L'algoritmo è neutro sulle variabili protette. <strong>Critica:</strong> l'uso di variabili correlate a caratteristiche protette è considerato «discriminazione algoritmica indiretta» da molti ordinamenti."
+      },
+      {
+        role: "algoritmo",
+        label: "Il fornitore del modello",
+        roleClass: "algoritmo",
+        quote: "«Il modello predice con accuratezza. Se alcune aree hanno storicamente tassi di insolvenza più alti, è corretto che il modello lo rispecchi.»",
+        detail: "<strong>Logica:</strong> la discriminazione passata (accesso al credito negato a certi quartieri) ha creato i dati su cui l'algoritmo si allena. L'algoritmo impara e perpetua il pattern. <strong>Termine tecnico:</strong> feedback loop discriminatorio."
+      },
+      {
+        role: "difensore",
+        label: "Garante della privacy",
+        roleClass: "difensore",
+        quote: "«Il GDPR garantisce il diritto a non essere soggetti a decisioni automatizzate significative. La banca deve fornire spiegazione e ricorso.»",
+        detail: "<strong>Art. 22 GDPR:</strong> diritto di ottenere intervento umano, esprimere il proprio punto di vista, contestare la decisione. <strong>In pratica:</strong> pochissime banche in Italia rispettano pienamente questo diritto. La coppia può fare ricorso — ma raramente lo sa."
+      }
+    ],
+    insight: "Il mutuo algoritmico è uno dei casi più concreti di discriminazione invisibile. Il problema non è l'algoritmo in sé: è che codifica discriminazioni storiche e le rende automatiche, veloci, scalabili."
+  },
+  {
+    id: "C3",
+    title: "La diagnosi negata",
+    summary: "Un software medico usato in ospedali USA raccomanda di non operare un paziente. Il paziente è nero. Studi successivi mostrano che il modello, addestrato su costi sanitari storici, era sistematicamente meno propenso a raccomandare cure per pazienti neri.",
+    lenses: [
+      {
+        role: "imputato",
+        label: "Il paziente",
+        roleClass: "imputato",
+        quote: "«Il mio medico ha detto che l'algoritmo suggeriva di aspettare. Non sapevo che altri pazienti con gli stessi sintomi venivano operati subito.»",
+        detail: "<strong>Contesto:</strong> il software usava la spesa sanitaria storica come proxy per «bisogno di cure». Poiché i pazienti neri storicamente ricevevano meno cure (per disuguaglianza sistemica), il modello li classificava come «meno bisognosi»."
+      },
+      {
+        role: "giudice",
+        label: "Il medico",
+        roleClass: "giudice",
+        quote: "«Uso l'algoritmo come supporto, non come sostituto del giudizio clinico. Ma con 40 pazienti al giorno, il suo peso è inevitabile.»",
+        detail: "<strong>Pressione reale:</strong> i sistemi di supporto alle decisioni cliniche riducono il tempo per caso. Il medico che si discosta sistematicamente dall'algoritmo deve documentare ogni eccezione. <strong>Effetto:</strong> il medico tende ad allinearsi, specialmente quando è sotto stress."
+      },
+      {
+        role: "algoritmo",
+        label: "L'azienda (Optum)",
+        roleClass: "algoritmo",
+        quote: "«Il modello predice i costi, non le cure necessarie. Non sapevamo che l'uso clinico avrebbe creato questi effetti.»",
+        detail: "<strong>Problema di design:</strong> l'algoritmo era ottimizzato per costi, non per esiti clinici. Ottimizzare per il proxy sbagliato in un contesto di disuguaglianza storica produce discriminazione. <strong>Studio:</strong> Science, 2019 — uno dei casi più documentati di bias algoritmico in sanità."
+      },
+      {
+        role: "difensore",
+        label: "Bioetista",
+        roleClass: "difensore",
+        quote: "«In medicina, un algoritmo che usa variabili correlate a razza — anche indirettamente — ha bisogno di audit indipendenti prima del deployment clinico.»",
+        detail: "<strong>Principio:</strong> in contesti ad alto rischio (salute, giustizia, lavoro), il principio di non maleficenza si applica anche agli algoritmi. <strong>Proposta:</strong> obbligatorietà di impact assessment su variabili sensibili prima dell'uso clinico."
+      }
+    ],
+    insight: "Il caso Optum mostra come un algoritmo 'neutro' (basato su costi) possa produrre discriminazione quando i dati su cui si allena rispecchiano disuguaglianze storiche. L'intento non basta: contano gli effetti."
+  }
+];
+
+let currentCase = null;
+let currentLens = 0;
+let scores = [];
+
+function init() {
+  const list = document.getElementById('case-list');
+  CASES.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'case-btn';
+    btn.innerHTML = `<div class="case-num">CASO ${c.id}</div><strong>${c.title}</strong><br><span style="color:var(--muted);font-size:13px">${c.summary.substring(0,100)}…</span>`;
+    btn.onclick = () => startCase(i);
+    list.appendChild(btn);
+  });
+}
+
+function startCase(idx) {
+  currentCase = CASES[idx];
+  currentLens = 0;
+  scores = new Array(currentCase.lenses.length).fill(0);
+
+  document.getElementById('step-0').style.display = 'none';
+  document.getElementById('step-1').style.display = 'block';
+
+  // case header
+  document.getElementById('case-header-slot').innerHTML = `
+    <div class="case-header">
+      <div class="case-num">CASO ${currentCase.id}</div>
+      <div class="case-title">${currentCase.title}</div>
+      <div class="case-summary">${currentCase.summary}</div>
+    </div>`;
+
+  renderLens();
+}
+
+function renderLens() {
+  const lens = currentCase.lenses[currentLens];
+  const total = currentCase.lenses.length;
+
+  // progress
+  const pb = document.getElementById('progress-bar');
+  pb.innerHTML = currentCase.lenses.map((_, i) => {
+    let cls = 'progress-dot';
+    if (i < currentLens) cls += ' done';
+    else if (i === currentLens) cls += ' current';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+
+  // tabs
+  const tabs = document.getElementById('lens-tabs');
+  tabs.innerHTML = currentCase.lenses.map((l, i) =>
+    `<button class="tab-btn${i === currentLens ? ' active' : ''}" onclick="jumpLens(${i})">${l.label}</button>`
+  ).join('');
+
+  // content
+  document.getElementById('lens-content').innerHTML = `
+    <div class="lens-card">
+      <div class="lens-role ${lens.roleClass}">${lens.label.toUpperCase()}</div>
+      <div class="lens-quote">${lens.quote}</div>
+      <div class="lens-detail">${lens.detail}</div>
+    </div>`;
+
+  // stars
+  const saved = scores[currentLens];
+  const stars = document.getElementById('stars');
+  stars.innerHTML = [1,2,3,4,5].map(n =>
+    `<button class="star-btn${saved >= n ? ' lit' : ''}" onclick="rate(${n})">★</button>`
+  ).join('');
+
+  // nav buttons
+  document.getElementById('btn-prev').disabled = currentLens === 0;
+  document.getElementById('btn-prev').style.opacity = currentLens === 0 ? '0.3' : '1';
+  const isLast = currentLens === total - 1;
+  document.getElementById('btn-next').textContent = isLast ? 'Vedi risultati' : 'Prospettiva successiva';
+}
+
+function rate(n) {
+  scores[currentLens] = n;
+  document.querySelectorAll('.star-btn').forEach((btn, i) => {
+    btn.classList.toggle('lit', i < n);
+  });
+}
+
+function jumpLens(idx) {
+  currentLens = idx;
+  renderLens();
+}
+
+function prevLens() {
+  if (currentLens > 0) { currentLens--; renderLens(); }
+}
+
+function nextLens() {
+  const total = currentCase.lenses.length;
+  if (currentLens < total - 1) {
+    currentLens++;
+    renderLens();
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  document.getElementById('step-1').style.display = 'none';
+  document.getElementById('step-2').style.display = 'block';
+
+  const maxScore = Math.max(...scores, 1);
+  const colors = ['var(--cream)', 'var(--gold)', 'var(--teal)', 'var(--copper)'];
+
+  const rows = document.getElementById('result-rows');
+  rows.innerHTML = currentCase.lenses.map((lens, i) => {
+    const pct = scores[i] ? Math.round((scores[i] / 5) * 100) : 0;
+    return `
+      <div class="result-row">
+        <div class="result-label" style="color:${colors[i]}">${lens.label}</div>
+        <div class="result-bar-wrap">
+          <div class="result-bar" style="width:${pct}%;background:${colors[i]}"></div>
+        </div>
+        <div class="result-score">${scores[i] > 0 ? '★'.repeat(scores[i]) : '—'}</div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('insight-text').textContent = currentCase.insight;
+
+  // animate bars after render
+  setTimeout(() => {}, 50);
+}
+
+function restart() {
+  document.getElementById('step-2').style.display = 'none';
+  document.getElementById('step-0').style.display = 'block';
+}
+
+init();
+</script>
+</body>
+</html>

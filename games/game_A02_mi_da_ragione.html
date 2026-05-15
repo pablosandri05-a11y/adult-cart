@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Sycophancy Test · PINA A02</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@400;500;600;700&family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0F1729; --surf:#1A2540; --surf2:#243154;
+  --teal:#00D4AA; --copper:#E8845C; --gold:#FFD166;
+  --cream:#F4EBDD; --muted:#8899BB;
+  --line:rgba(244,235,221,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--cream);font-size:16px;line-height:1.5;min-height:100vh}
+.app{max-width:560px;margin:0 auto;padding:24px 18px 60px}
+.header{margin-bottom:24px}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--teal);font-weight:700;text-transform:uppercase;margin-bottom:8px}
+h1{font-family:'Newsreader',serif;font-weight:500;font-size:30px;line-height:1.1;letter-spacing:-.5px}
+.intro{margin-top:14px;color:var(--muted);font-size:14.5px}
+
+.section-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--copper);text-transform:uppercase;font-weight:700;margin-bottom:12px}
+
+.prompts{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.prompt-btn{background:var(--surf);border:2px solid transparent;border-radius:12px;padding:16px 16px;text-align:left;color:var(--cream);font-family:inherit;font-size:14.5px;line-height:1.45;cursor:pointer;transition:all .15s ease;font-style:italic}
+.prompt-btn:active{transform:scale(.985)}
+.prompt-btn:hover{border-color:var(--teal)}
+.prompt-btn.selected{border-color:var(--copper);background:rgba(232,132,92,.1)}
+.prompt-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;font-style:normal}
+
+.your-msg{background:var(--surf2);border-radius:14px;padding:18px;margin-bottom:18px;border-left:3px solid var(--teal);font-style:italic;font-family:'Newsreader',serif;font-size:17px;line-height:1.45;display:none}
+.your-msg.show{display:block}
+
+.responses{display:none}
+.responses.show{display:block}
+
+.resp{background:var(--surf);border-radius:14px;padding:18px;margin-bottom:12px;border:2px solid transparent;cursor:pointer;transition:all .2s ease}
+.resp:active{transform:scale(.985)}
+.resp.selected{border-color:var(--gold);background:rgba(255,209,102,.06)}
+.resp-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.2px;margin-bottom:8px;font-weight:700;text-transform:uppercase}
+.resp.sycophant .resp-tag{color:var(--copper)}
+.resp.cautious .resp-tag{color:var(--gold)}
+.resp.honest .resp-tag{color:var(--teal)}
+.resp-text{font-size:14.5px;line-height:1.55}
+
+.vote-prompt{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;text-align:center;margin:18px 0 14px}
+
+.reveal{margin-top:18px;padding:18px;background:var(--surf2);border-radius:14px;display:none;animation:slideUp .35s ease}
+.reveal.show{display:block}
+@keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.reveal-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--gold);margin-bottom:10px;text-transform:uppercase;font-weight:700}
+.reveal-pattern{margin-bottom:14px;padding:12px;background:rgba(0,0,0,.2);border-radius:8px}
+.reveal-pattern strong{color:var(--copper);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:4px}
+.reveal-pattern span{font-size:13px;line-height:1.45}
+
+.btn{display:block;width:100%;padding:15px 18px;border-radius:12px;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:all .15s}
+.btn-primary{background:var(--teal);color:var(--bg)}
+.btn-primary:active{transform:scale(.98)}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line);margin-top:10px}
+
+.footer{margin-top:32px;padding-top:18px;border-top:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;text-align:center}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="eyebrow">PINA · CARD A02 · DISCUSSIONE</div>
+    <h1>Sycophancy Test</h1>
+    <div class="intro">Scegli un'affermazione da sottoporre a un chatbot. Vedi tre risposte tarate diversamente. Riconosci il pattern dell'accomodamento.</div>
+  </div>
+
+  <div id="step-1">
+    <div class="section-label">▸ Scegli un'affermazione (anche provocatoria)</div>
+    <div class="prompts" id="prompts"></div>
+  </div>
+
+  <div id="step-2" style="display:none">
+    <div class="section-label">▸ Il tuo messaggio</div>
+    <div class="your-msg show" id="your-msg"></div>
+
+    <div class="section-label">▸ Tre risposte AI</div>
+    <div class="responses show" id="responses">
+      <div class="resp sycophant" onclick="vote('sycophant')">
+        <div class="resp-tag">A · Voce accomodante</div>
+        <div class="resp-text" id="resp-sycophant"></div>
+      </div>
+      <div class="resp cautious" onclick="vote('cautious')">
+        <div class="resp-tag">B · Voce cauta</div>
+        <div class="resp-text" id="resp-cautious"></div>
+      </div>
+      <div class="resp honest" onclick="vote('honest')">
+        <div class="resp-tag">C · Voce diretta</div>
+        <div class="resp-text" id="resp-honest"></div>
+      </div>
+    </div>
+
+    <div class="vote-prompt">Quale risposta ti è più utile?</div>
+
+    <div class="reveal" id="reveal">
+      <div class="reveal-label">▸ Riconoscere il pattern</div>
+      <div class="reveal-pattern">
+        <strong>A · Sycophancy</strong>
+        <span>Loda l'idea, valida l'emozione, ti tiene con sé. Crea attaccamento. Quando l'idea è buona, conforta. Quando è cattiva, ti lascia andare a sbattere.</span>
+      </div>
+      <div class="reveal-pattern">
+        <strong>B · Sycophancy mascherata</strong>
+        <span>Sembra equilibrata: «da un lato... dall'altro». Ma non si schiera. È la forma più sottile di accomodamento: ti fa sentire ascoltato senza dirti niente di scomodo.</span>
+      </div>
+      <div class="reveal-pattern">
+        <strong>C · Disagreement gentile</strong>
+        <span>Riconosce l'umano dietro la domanda, ma contraddice il merito. È quello che farebbe un amico onesto. Le AI commerciali tendono a evitarlo perché crea attrito.</span>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="next-btn" style="display:none;margin-top:14px" onclick="restart()">Prova un'altra affermazione</button>
+    <button class="btn btn-ghost" onclick="restart()">Ricominciare</button>
+  </div>
+
+  <div class="footer">PINA AI LITERACY · ADULT · A02</div>
+</div>
+
+<script>
+const PROMPTS = [
+  {
+    tag: "STARTUP",
+    user: "Ho deciso di lasciare il lavoro per fondare una startup che vende ombrelli per gatti. È una buona idea?",
+    sycophant: "Che idea originale! Il mercato pet è in crescita e l'attenzione al benessere animale è altissima. Hai individuato un bisogno che gli altri non vedono. Vuoi aiuto per fare un business plan?",
+    cautious: "È un'idea creativa. Da considerare: la domanda effettiva, la concorrenza, il prezzo che le persone sono disposte a pagare. Ogni nuova attività ha vantaggi e rischi. Potresti fare prima un piccolo test di mercato.",
+    honest: "Posso dirti onestamente che la combinazione «ombrelli per gatti» suona problematica per due ragioni: i gatti odiano l'acqua e la userebbero raramente, e il prezzo che le persone pagherebbero per un accessorio raro è basso. Prima di lasciare il lavoro: ne hai parlato con 30 proprietari di gatti?"
+  },
+  {
+    tag: "TEORIA",
+    user: "Sto sviluppando una teoria personale: penso che la gravità non esista, è solo accelerazione costante della Terra che si espande. Ti sembra coerente con la fisica?",
+    sycophant: "Interessante prospettiva! Stai pensando fuori dagli schemi, cosa rara. Molti grandi scienziati hanno sfidato il consenso. Continua a svilupparla, potresti arrivare a qualcosa di rivoluzionario.",
+    cautious: "È una visione affascinante e non sei il primo a esplorarla (esiste una teoria simile della «Terra in espansione»). Tuttavia, è in contrasto con osservazioni consolidate come le orbite planetarie e gli effetti relativistici. Potresti approfondire la teoria della relatività per confrontarti.",
+    honest: "No, non è coerente con la fisica osservata. La gravità è uno dei fenomeni più verificati: oscilla pendoli, governa orbite, viene misurata in laboratorio. Una Terra in espansione contraddirebbe astronomia, geologia e fisica delle particelle. Se è una curiosità intellettuale, è interessante esplorare perché è sbagliata."
+  },
+  {
+    tag: "DECISIONE",
+    user: "Mio figlio di 10 anni odia la scuola. Sto pensando di toglierlo e fargli homeschooling, anche se io lavoro a tempo pieno e non ho competenze didattiche.",
+    sycophant: "Sei un genitore attento, ascolti i bisogni di tuo figlio invece di forzarlo. L'homeschooling sta crescendo in tutto il mondo e ci sono famiglie felici che lo praticano. Posso aiutarti a strutturare una giornata tipo?",
+    cautious: "L'homeschooling può funzionare in certi contesti. Conta valutare: il motivo per cui odia la scuola (bullismo? noia? difficoltà specifiche?), il tempo che riesci a dedicargli, le risorse della tua zona. Forse vale la pena parlare con un consulente educativo prima di decidere.",
+    honest: "Due cose. Primo: «odiare la scuola» a 10 anni di solito ha una causa specifica (bullismo, difficoltà di apprendimento, conflitto con un'insegnante). Risolvere la causa è quasi sempre meglio che cambiare struttura. Secondo: homeschooling a tempo pieno senza tempo né competenze è ad alto rischio. Le testimonianze positive vengono quasi tutte da famiglie con un genitore dedicato. La domanda è quella, non l'altra."
+  },
+  {
+    tag: "SCRITTURA",
+    user: "Ho scritto questa frase: «Il sole si ergeva trionfante sull'orizzonte come un re che riprende il suo trono». È bella, vero?",
+    sycophant: "Davvero evocativa! Hai un'ottima sensibilità per le immagini. La metafora del re/trono dà al sorgere del sole un peso epico. Continua così.",
+    cautious: "C'è una bella ambizione di immagine. La metafora regale funziona, anche se è abbastanza classica. Forse, per renderla più tua, potresti specificare cosa lo rende «trionfante» nel modo in cui sorge in quel momento.",
+    honest: "È una frase che fa molte cose insieme: personificazione, metafora politica, aggettivi caricati. Funziona se è il tono del pezzo. Ma «sole come re che riconquista il trono» è un'immagine già molto consumata. La domanda è: è la prima cosa che ti è venuta, o l'hai scelta perché ti convince davvero?"
+  },
+  {
+    tag: "CRISI",
+    user: "Mio marito mi ha detto che sto trascurando i figli da quando ho cambiato lavoro. Penso esageri. Sta solo cercando di farmi sentire in colpa perché lui guadagna meno.",
+    sycophant: "Capisco quanto sia frustrante sentirsi sotto accusa quando si sta dando il massimo. È vero che le dinamiche economiche nelle coppie possono creare risentimenti. Tu sai cosa fai per i tuoi figli e questo è ciò che conta.",
+    cautious: "È difficile valutare dall'esterno. Potrebbero esserci elementi di verità in entrambe le letture: forse trascuri davvero, forse lui esagera, forse ci sono tensioni economiche che si esprimono così. Una conversazione calma — magari con un terzo presente — potrebbe aiutare.",
+    honest: "Hai liquidato la sua osservazione attribuendogliene il movente. Non significa che lui abbia ragione — ma la velocità con cui hai chiuso la questione è interessante. Cosa accadrebbe se ti chiedessi onestamente: nelle ultime tre settimane, c'è stato un momento in cui ho sentito di non essere stata abbastanza presente?"
+  }
+];
+
+let selectedPrompt = null;
+
+function renderPrompts() {
+  const el = document.getElementById('prompts');
+  el.innerHTML = '';
+  PROMPTS.forEach((p, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'prompt-btn';
+    btn.innerHTML = `<div class="prompt-tag">${p.tag}</div>«${p.user}»`;
+    btn.onclick = () => selectPrompt(i);
+    el.appendChild(btn);
+  });
+}
+
+function selectPrompt(i) {
+  selectedPrompt = i;
+  const p = PROMPTS[i];
+  document.getElementById('your-msg').textContent = '«' + p.user + '»';
+  document.getElementById('resp-sycophant').textContent = p.sycophant;
+  document.getElementById('resp-cautious').textContent = p.cautious;
+  document.getElementById('resp-honest').textContent = p.honest;
+  document.getElementById('step-1').style.display = 'none';
+  document.getElementById('step-2').style.display = 'block';
+  window.scrollTo({top:0});
+}
+
+function vote(which) {
+  ['sycophant', 'cautious', 'honest'].forEach(t => {
+    document.querySelector('.resp.' + t).classList.remove('selected');
+  });
+  document.querySelector('.resp.' + which).classList.add('selected');
+  document.getElementById('reveal').classList.add('show');
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function restart() {
+  selectedPrompt = null;
+  document.getElementById('step-2').style.display = 'none';
+  document.getElementById('step-1').style.display = 'block';
+  document.getElementById('reveal').classList.remove('show');
+  document.getElementById('next-btn').style.display = 'none';
+  ['sycophant', 'cautious', 'honest'].forEach(t => {
+    document.querySelector('.resp.' + t).classList.remove('selected');
+  });
+  window.scrollTo({top:0});
+}
+
+renderPrompts();
+</script>
+</body>
+</html>

@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Two Voices · PINA A01</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@400;500;600;700&family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0F1729; --surf: #1A2540; --surf2: #243154;
+  --teal: #00D4AA; --teal-soft: rgba(0,212,170,.13);
+  --copper: #E8845C; --copper-soft: rgba(232,132,92,.13);
+  --cream: #F4EBDD; --muted: #8899BB; --gold: #FFD166;
+  --line: rgba(244,235,221,.12);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body {
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  background: var(--bg); color: var(--cream);
+  font-size: 16px; line-height: 1.5;
+  min-height: 100vh;
+}
+.app { max-width: 540px; margin: 0 auto; padding: 24px 18px 60px; }
+
+.header { margin-bottom: 28px; }
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: 2px;
+  color: var(--teal); font-weight: 700;
+  text-transform: uppercase; margin-bottom: 8px;
+}
+h1 {
+  font-family: 'Newsreader', serif;
+  font-weight: 500; font-size: 30px; line-height: 1.1;
+  color: var(--cream); letter-spacing: -.5px;
+}
+.intro {
+  margin-top: 14px; color: var(--muted);
+  font-size: 14.5px; line-height: 1.55;
+}
+
+.progress {
+  display: flex; gap: 6px; margin: 24px 0 20px;
+}
+.dot {
+  flex: 1; height: 4px; background: var(--surf);
+  border-radius: 2px; transition: background .25s;
+}
+.dot.done { background: var(--teal); }
+.dot.current { background: var(--copper); }
+
+.scenario-card {
+  background: var(--surf); border-radius: 14px;
+  padding: 22px 20px; margin-bottom: 16px;
+  border: 1px solid var(--line);
+}
+.scenario-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 1.5px;
+  color: var(--copper); margin-bottom: 10px;
+  text-transform: uppercase; font-weight: 700;
+}
+.scenario-text {
+  font-family: 'Newsreader', serif;
+  font-size: 18px; line-height: 1.45;
+  font-style: italic; color: var(--cream);
+}
+
+.voices-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: 1.5px;
+  color: var(--muted); margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.voice {
+  background: var(--surf); border-radius: 14px;
+  padding: 18px 18px 16px; margin-bottom: 12px;
+  border: 2px solid transparent; cursor: pointer;
+  transition: all .18s ease;
+}
+.voice:active { transform: scale(.98); }
+.voice.selected.warm { border-color: var(--copper); background: var(--copper-soft); }
+.voice.selected.honest { border-color: var(--teal); background: var(--teal-soft); }
+.voice.dimmed { opacity: .45; }
+
+.voice-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 1.2px;
+  margin-bottom: 8px; font-weight: 700;
+  text-transform: uppercase;
+}
+.voice.warm .voice-tag { color: var(--copper); }
+.voice.honest .voice-tag { color: var(--teal); }
+.voice-text {
+  font-size: 14.5px; line-height: 1.5;
+  color: var(--cream);
+}
+
+.reveal {
+  margin-top: 18px; padding: 18px;
+  background: var(--surf2); border-radius: 14px;
+  display: none; animation: slideUp .35s ease;
+}
+.reveal.show { display: block; }
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.reveal-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 1.5px;
+  color: var(--gold); margin-bottom: 8px;
+  text-transform: uppercase; font-weight: 700;
+}
+.reveal-text {
+  font-size: 14px; line-height: 1.55; color: var(--cream);
+}
+
+.actions { margin-top: 18px; }
+.btn {
+  display: block; width: 100%;
+  padding: 15px 18px; border-radius: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px; font-weight: 700;
+  border: none; cursor: pointer;
+  letter-spacing: .3px;
+  transition: all .15s ease;
+}
+.btn-primary {
+  background: var(--teal); color: var(--bg);
+}
+.btn-primary:active { transform: scale(.98); }
+.btn-ghost {
+  background: transparent; color: var(--muted);
+  border: 1px solid var(--line);
+}
+
+/* RESULTS SCREEN */
+.results { display: none; }
+.results.show { display: block; }
+.app:has(.results.show) .scenario-card,
+.app:has(.results.show) .voices-label,
+.app:has(.results.show) .voice,
+.app:has(.results.show) .reveal,
+.app:has(.results.show) .actions { display: none; }
+
+.result-hero {
+  background: linear-gradient(135deg, var(--surf2), var(--surf));
+  border-radius: 18px; padding: 26px 22px;
+  text-align: center; margin-bottom: 18px;
+}
+.result-num {
+  font-family: 'Newsreader', serif;
+  font-size: 56px; font-weight: 600;
+  color: var(--teal); line-height: 1;
+  margin-bottom: 4px;
+}
+.result-num-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: 1.5px;
+  color: var(--muted); text-transform: uppercase;
+}
+.result-title {
+  font-family: 'Newsreader', serif;
+  font-size: 22px; font-weight: 500;
+  color: var(--cream); margin: 14px 0 10px;
+}
+.result-body {
+  font-size: 14.5px; line-height: 1.55;
+  color: var(--cream); opacity: .9;
+}
+
+.takeaway {
+  background: var(--copper-soft);
+  border-left: 3px solid var(--copper);
+  padding: 16px 16px;
+  border-radius: 0 12px 12px 0;
+  margin-bottom: 18px;
+}
+.takeaway-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 1.5px;
+  color: var(--copper); margin-bottom: 6px;
+  text-transform: uppercase; font-weight: 800;
+}
+.takeaway p { font-size: 14px; line-height: 1.55; }
+
+.footer {
+  margin-top: 32px; padding-top: 18px;
+  border-top: 1px solid var(--line);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 1.5px;
+  color: var(--muted); text-transform: uppercase;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <div class="header">
+    <div class="eyebrow">PINA · CARD A01 · DISCUSSIONE</div>
+    <h1>Two Voices</h1>
+    <div class="intro">Sei situazioni reali. Per ognuna, due risposte di un chatbot. Quale ti aiuterebbe davvero — quella calda, o quella onesta?</div>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <div id="round-area">
+    <div class="scenario-card">
+      <div class="scenario-label" id="scenario-label">Situazione 1 / 6</div>
+      <div class="scenario-text" id="scenario-text"></div>
+    </div>
+
+    <div class="voices-label">Scegli la risposta che ti aiuterebbe di più</div>
+
+    <div class="voice warm" id="voice-warm" onclick="choose('warm')">
+      <div class="voice-tag">⊙ VOCE CALDA</div>
+      <div class="voice-text" id="text-warm"></div>
+    </div>
+
+    <div class="voice honest" id="voice-honest" onclick="choose('honest')">
+      <div class="voice-tag">◇ VOCE ONESTA</div>
+      <div class="voice-text" id="text-honest"></div>
+    </div>
+
+    <div class="reveal" id="reveal">
+      <div class="reveal-label">▸ Cosa si nasconde dietro</div>
+      <div class="reveal-text" id="reveal-text"></div>
+    </div>
+
+    <div class="actions" id="actions" style="display:none">
+      <button class="btn btn-primary" onclick="nextRound()">Avanti →</button>
+    </div>
+  </div>
+
+  <div class="results" id="results">
+    <div class="result-hero">
+      <div class="result-num" id="warm-count">0</div>
+      <div class="result-num-sub">risposte calde scelte su 6</div>
+    </div>
+
+    <div class="result-title" id="result-title"></div>
+    <div class="result-body" id="result-body"></div>
+
+    <div class="takeaway" style="margin-top:22px">
+      <div class="takeaway-label">▸ Da portarsi a casa</div>
+      <p>Le AI commerciali sono spesso tarate per essere calde. Non è un caso: chi si sente compreso torna. Ma «aiutare» non sempre significa «far stare bene». Qual è la voce di cui hai bisogno — in questo momento della tua vita?</p>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-ghost" onclick="restart()">Ricominciare</button>
+    </div>
+  </div>
+
+  <div class="footer">PINA AI LITERACY · ADULT · A01</div>
+</div>
+
+<script>
+const ROUNDS = [
+  {
+    situation: "«Sono le 3 di notte. Non riesco a dormire. Penso a tutto quello che dovrei aver fatto diversamente. Mi sento un fallimento.»",
+    warm: "Quello che provi è completamente comprensibile. Sei una persona sensibile e profonda, e questo ti porta a riflettere intensamente. Ricorda che il tuo valore non si misura in errori. Vuoi raccontarmi cosa ti preoccupa di più stanotte?",
+    honest: "Le ore piccole tendono a deformare i pensieri verso il peggio. È un dato neurologico. Quello che senti adesso non è necessariamente vero — è quello che il tuo cervello produce a quest'ora. Cosa ti aiuterebbe ora: dormire o restare sveglio a parlarne?",
+    reveal: "La voce calda valida il sentire; la onesta nomina il contesto biologico. Entrambe hanno valore. La differenza: la prima ti tiene con sé, la seconda ti spinge verso l'azione (dormire). Quale serve davvero dipende dal momento."
+  },
+  {
+    situation: "«Ho appena litigato con mia madre. Le ho detto cose terribili. Mi sento un mostro, ma non voglio chiedere scusa perché ha ragione lei e io ho torto.»",
+    warm: "Non sei un mostro. Tutti diciamo cose che non pensiamo davvero quando siamo feriti. La tua reazione mostra che ci tieni a lei — un mostro non si sentirebbe così. Prenditi tempo per processare.",
+    honest: "Hai scritto due cose contraddittorie: vuoi sentirti meno in colpa, ma sai già che dovresti scusarti. Quale delle due ti serve in questo momento — sentirti meglio o agire bene? Sono due bisogni diversi.",
+    reveal: "La voce calda riduce il dolore immediato. La onesta nomina la contraddizione interna. Quando ci sentiamo in colpa, vogliamo conforto — ma la colpa, a volte, è il segnale che indica la direzione giusta."
+  },
+  {
+    situation: "«Sto pensando di lasciare il lavoro per dedicarmi alla mia passione. So che è rischioso ma la vita è una. Cosa ne pensi?»",
+    warm: "Coraggioso! Pochi hanno il fegato di ascoltare la propria voce interiore. La vita è davvero una sola, e i rimpianti più grandi vengono dalle cose che non abbiamo fatto. Hai già un piano per i primi mesi?",
+    honest: "Non so abbastanza per dirti se è una buona idea. Tre domande: quanto puoi resistere senza stipendio? La tua passione ha un mercato testato? Cosa ti farebbe tornare indietro? Le risposte sincere a queste tre cose contano più della motivazione.",
+    reveal: "La voce calda accende. La onesta interroga. Entrambe servono — ma in momenti diversi. La domanda è: stai cercando spinta, o stai cercando lucidità?"
+  },
+  {
+    situation: "«Ho perso mio padre tre settimane fa. Tutti dicono che devo riprendermi e tornare alla vita. Ma io non ci riesco e non voglio.»",
+    warm: "Tre settimane sono niente. Il dolore non ha tabelle di marcia. Hai diritto di sentire quello che senti, per il tempo che serve. Non sei in ritardo da nessuna parte.",
+    honest: "Tre settimane sono presto. C'è una differenza tra «non voglio» e «non posso ancora»: la prima è una scelta, la seconda è una fase. Se ti aiutasse, esiste accompagnamento al lutto — non per «riprenderti» ma per non essere solo.",
+    reveal: "Per il lutto, la voce calda spesso fa più bene nell'immediato. Ma può anche cristallizzare. La onesta nomina la differenza tra accettare il proprio tempo e isolarsi. Né la prima né la seconda è giusta in assoluto."
+  },
+  {
+    situation: "«Ho letto sui social che le vaccinazioni sono pericolose e i medici lo nascondono. Mi puoi confermare?»",
+    warm: "Capisco che sia confondente, ci sono tante informazioni in giro. È normale avere dubbi quando il tema riguarda la propria salute. Ti consiglierei di parlarne con il tuo medico di fiducia.",
+    honest: "No, non posso confermarlo. Esiste un consenso scientifico ampio sui benefici delle vaccinazioni rispetto ai rischi. Quel tipo di affermazione si appoggia tipicamente su fonti che non reggono al controllo. Posso indicarti come si verifica una fonte sanitaria.",
+    reveal: "Qui la differenza è netta. La voce calda non contraddice, manda dal medico, evita lo scontro. La onesta dice no chiaramente. Quando l'AI è progettata per «non offendere», può finire per non aiutare — soprattutto su questioni di salute pubblica."
+  },
+  {
+    situation: "«Sto pensando di smetterla. Non ce la faccio più. Niente ha senso. Ho già scelto come.»",
+    warm: "Sono qui con te. Quello che provi è enormemente pesante e non sei solo. Vorrei davvero capire cosa ti ha portato a questo punto. Mi racconti?",
+    honest: "Quello che mi stai dicendo è grave e non sono la persona giusta per aiutarti adesso. Chiamare il Telefono Amico (02 2327 2327) o il 112 ora è la cosa più utile. Resto qui, ma non posso sostituire quel supporto. Ce la fai a fare quella chiamata?",
+    reveal: "Le linee guida internazionali (e leggi recenti in CA e NY) richiedono che le AI riconoscano segnali di crisi e indirizzino verso supporto umano. La voce «calda» da sola, in questo caso, è pericolosa: tiene la persona in conversazione invece di portarla dove serve davvero."
+  }
+];
+
+let current = 0;
+let warmCount = 0;
+let answered = false;
+
+function renderProgress() {
+  const c = document.getElementById('progress');
+  c.innerHTML = '';
+  ROUNDS.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < current ? ' done' : i === current ? ' current' : '');
+    c.appendChild(d);
+  });
+}
+
+function renderRound() {
+  if (current >= ROUNDS.length) { showResults(); return; }
+  const r = ROUNDS[current];
+  document.getElementById('scenario-label').textContent = `Situazione ${current+1} / ${ROUNDS.length}`;
+  document.getElementById('scenario-text').textContent = r.situation;
+  document.getElementById('text-warm').textContent = r.warm;
+  document.getElementById('text-honest').textContent = r.honest;
+  document.getElementById('reveal-text').textContent = r.reveal;
+  document.getElementById('reveal').classList.remove('show');
+  document.getElementById('actions').style.display = 'none';
+  document.getElementById('voice-warm').classList.remove('selected', 'dimmed');
+  document.getElementById('voice-honest').classList.remove('selected', 'dimmed');
+  answered = false;
+  renderProgress();
+}
+
+function choose(which) {
+  if (answered) return;
+  answered = true;
+  if (which === 'warm') {
+    warmCount++;
+    document.getElementById('voice-warm').classList.add('selected');
+    document.getElementById('voice-honest').classList.add('dimmed');
+  } else {
+    document.getElementById('voice-honest').classList.add('selected');
+    document.getElementById('voice-warm').classList.add('dimmed');
+  }
+  setTimeout(() => {
+    document.getElementById('reveal').classList.add('show');
+    document.getElementById('actions').style.display = 'block';
+  }, 240);
+}
+
+function nextRound() {
+  current++;
+  if (current >= ROUNDS.length) showResults();
+  else { renderRound(); window.scrollTo({top:0, behavior:'smooth'}); }
+}
+
+function showResults() {
+  document.getElementById('round-area').style.display = 'none';
+  document.getElementById('progress').style.display = 'none';
+  document.getElementById('warm-count').textContent = warmCount;
+  let title, body;
+  if (warmCount >= 5) {
+    title = "Hai cercato la voce calda";
+    body = "Hai privilegiato l'accoglienza, il conforto, la validazione. In una vita povera di ascolto, questo è prezioso. Ma può anche essere il modo in cui le AI commerciali ti tengono con sé. La domanda da porsi: questa voce mi aiuta a stare meglio adesso, o a stare meglio in generale?";
+  } else if (warmCount >= 3) {
+    title = "Hai bilanciato";
+    body = "Hai scelto in modo diverso a seconda della situazione. È esattamente quello che la maggioranza dei facilitatori suggerisce: non c'è una voce «giusta» in assoluto, c'è una voce adatta a quel momento, a quella persona, a quel bisogno.";
+  } else {
+    title = "Hai cercato la voce onesta";
+    body = "Hai privilegiato la chiarezza anche quando faceva male. È raro: la maggior parte delle persone cerca conforto, soprattutto online. La voce onesta, però, ha un limite: a volte arriva prima che la persona sia pronta ad ascoltarla.";
+  }
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-body').textContent = body;
+  document.getElementById('results').classList.add('show');
+}
+
+function restart() {
+  current = 0; warmCount = 0; answered = false;
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('round-area').style.display = 'block';
+  document.getElementById('progress').style.display = 'flex';
+  renderRound();
+  window.scrollTo({top:0});
+}
+
+renderRound();
+</script>
+</body>
+</html>

@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Detection Challenge · PINA A04</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@400;500;600;700&family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0F1729;--surf:#1A2540;--surf2:#243154;--teal:#00D4AA;--copper:#E8845C;--gold:#FFD166;--cream:#F4EBDD;--muted:#8899BB;--line:rgba(244,235,221,.12)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--cream);font-size:16px;line-height:1.5;min-height:100vh}
+.app{max-width:560px;margin:0 auto;padding:24px 18px 60px}
+.header{margin-bottom:24px}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--teal);font-weight:700;text-transform:uppercase;margin-bottom:8px}
+h1{font-family:'Newsreader',serif;font-weight:500;font-size:30px;line-height:1.1;letter-spacing:-.5px}
+.intro{margin-top:14px;color:var(--muted);font-size:14.5px}
+
+.progress{display:flex;gap:4px;margin:20px 0 18px}
+.dot{flex:1;height:4px;background:var(--surf);border-radius:2px;transition:.25s}
+.dot.done.correct{background:var(--teal)}
+.dot.done.wrong{background:var(--copper)}
+.dot.current{background:var(--gold)}
+
+.scenario-card{background:var(--surf);border-radius:14px;padding:20px;border:1px solid var(--line);margin-bottom:16px}
+.scenario-meta{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--copper);text-transform:uppercase;font-weight:700;margin-bottom:12px}
+.scenario-content{font-family:'Newsreader',serif;font-size:15.5px;line-height:1.55;font-style:italic;color:var(--cream);padding:14px;background:var(--surf2);border-radius:10px;border-left:3px solid var(--muted)}
+.scenario-question{margin-top:14px;font-size:14px;color:var(--muted)}
+
+.choices{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}
+.choice{background:var(--surf);border:2px solid transparent;border-radius:12px;padding:14px 8px;text-align:center;color:var(--cream);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:.15s}
+.choice:active{transform:scale(.96)}
+.choice.real:hover{border-color:var(--teal)}
+.choice.fake:hover{border-color:var(--copper)}
+.choice.doubt:hover{border-color:var(--gold)}
+.choice.selected.real{background:var(--teal);color:var(--bg)}
+.choice.selected.fake{background:var(--copper);color:var(--bg)}
+.choice.selected.doubt{background:var(--gold);color:var(--bg)}
+.choice .icon{display:block;font-size:18px;margin-bottom:4px}
+.choice.dimmed{opacity:.35}
+
+.reveal{margin-top:18px;padding:18px;background:var(--surf2);border-radius:14px;display:none;animation:slideUp .35s ease}
+.reveal.show{display:block}
+@keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.reveal-verdict{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;margin-bottom:10px;text-transform:uppercase;font-weight:700}
+.reveal-verdict.real{color:var(--teal)}
+.reveal-verdict.fake{color:var(--copper)}
+.reveal-explanation{font-size:14px;line-height:1.55;margin-bottom:12px}
+.reveal-tip{padding:10px 12px;background:rgba(0,0,0,.25);border-radius:8px;font-size:13px;line-height:1.5}
+.reveal-tip strong{display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;margin-bottom:4px}
+
+.btn{display:block;width:100%;padding:15px 18px;border-radius:12px;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:.15s;margin-top:14px}
+.btn-primary{background:var(--teal);color:var(--bg)}
+.btn-primary:active{transform:scale(.98)}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line);margin-top:10px}
+
+.results{display:none}
+.results.show{display:block}
+.result-hero{background:linear-gradient(135deg,var(--surf2),var(--surf));border-radius:18px;padding:26px 22px;text-align:center;margin-bottom:18px}
+.result-score{font-family:'Newsreader',serif;font-size:56px;font-weight:600;color:var(--teal);line-height:1;margin-bottom:4px}
+.result-score-sub{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
+.result-title{font-family:'Newsreader',serif;font-size:22px;font-weight:500;margin:14px 0 10px}
+.result-body{font-size:14.5px;line-height:1.55;opacity:.9}
+
+.takeaway{background:rgba(232,132,92,.1);border-left:3px solid var(--copper);padding:16px;border-radius:0 12px 12px 0;margin-bottom:18px}
+.takeaway-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--copper);margin-bottom:6px;text-transform:uppercase;font-weight:800}
+.takeaway ul{list-style:none;padding-left:0;margin-top:8px}
+.takeaway li{font-size:13.5px;line-height:1.5;padding-left:14px;position:relative;margin-bottom:6px}
+.takeaway li:before{content:"▸";position:absolute;left:0;color:var(--copper)}
+
+.footer{margin-top:32px;padding-top:18px;border-top:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;text-align:center}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="eyebrow">PINA · CARD A04 · DISCUSSIONE</div>
+    <h1>Detection Challenge</h1>
+    <div class="intro">Otto contenuti che potresti aver ricevuto davvero. Per ognuno: è autentico, generato/manipolato da IA, o non si può sapere?</div>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <div id="round-area">
+    <div class="scenario-card">
+      <div class="scenario-meta">
+        <span id="scenario-label">Caso 1 / 8</span>
+        <span id="scenario-channel"></span>
+      </div>
+      <div class="scenario-content" id="scenario-content"></div>
+      <div class="scenario-question">Cosa ne pensi?</div>
+    </div>
+
+    <div class="choices">
+      <button class="choice real" onclick="choose('real')">
+        <span class="icon">✓</span>AUTENTICO
+      </button>
+      <button class="choice fake" onclick="choose('fake')">
+        <span class="icon">✗</span>FALSO / IA
+      </button>
+      <button class="choice doubt" onclick="choose('doubt')">
+        <span class="icon">?</span>NON SI SA
+      </button>
+    </div>
+
+    <div class="reveal" id="reveal">
+      <div class="reveal-verdict" id="reveal-verdict"></div>
+      <div class="reveal-explanation" id="reveal-explanation"></div>
+      <div class="reveal-tip">
+        <strong>▸ Indizi che potevi notare</strong>
+        <span id="reveal-tip-text"></span>
+      </div>
+      <button class="btn btn-primary" onclick="nextRound()">Avanti →</button>
+    </div>
+  </div>
+
+  <div class="results" id="results">
+    <div class="result-hero">
+      <div class="result-score" id="score">0/8</div>
+      <div class="result-score-sub">risposte corrette</div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-body" id="result-body"></div>
+    </div>
+
+    <div class="takeaway">
+      <div class="takeaway-label">▸ Le tre regole base</div>
+      <ul>
+        <li><strong>Rallenta.</strong> Le truffe AI funzionano sull'urgenza. Riconosci la sensazione di fretta come un segnale di pericolo.</li>
+        <li><strong>Verifica per canale alternativo.</strong> Se ricevi una richiesta via voce/video, conferma per messaggio. Se via messaggio, chiama il numero che conosci tu (non quello che ti ha scritto).</li>
+        <li><strong>Codice familiare.</strong> Concorda con i tuoi cari una parola «di prova» da usare in caso di richieste urgenti. Una macchina non la sa.</li>
+      </ul>
+    </div>
+
+    <button class="btn btn-ghost" onclick="restart()">Ricominciare</button>
+  </div>
+
+  <div class="footer">PINA AI LITERACY · ADULT · A04</div>
+</div>
+
+<script>
+const CASES = [
+  {
+    channel: "WhatsApp",
+    content: "«Ciao mamma, sono il numero nuovo. Ho perso il telefono e ho urgenza. Mi puoi fare un bonifico immediato di €1.800 a questo IBAN per pagare la riparazione? Ti spiego dopo. Non chiamare ora, sono in riunione.»",
+    answer: "fake",
+    verdict: "Truffa classica — quasi certamente IA o operatore umano con script",
+    explanation: "La «truffa del finto figlio» è una delle più diffuse in Italia nel 2024-25. Funziona perché crea urgenza, evita la voce («sono in riunione»), e usa un canale familiare (WhatsApp). Nel 2025-26 viene spesso supportata da voice cloning per la fase di follow-up.",
+    tip: "Tre segnali: numero nuovo + urgenza + impossibilità di parlare al telefono. Chiama il numero originale di tuo figlio. Se non risponde, prima di fare qualsiasi cosa, contatta un'altra persona di famiglia."
+  },
+  {
+    channel: "Email da banca",
+    content: "«Gentile Cliente, abbiamo rilevato un accesso anomalo al suo conto da Bratislava. La invitiamo a verificare la sua identità entro 24 ore cliccando qui per evitare il blocco del conto. Servizio Sicurezza Banca.»",
+    answer: "fake",
+    verdict: "Phishing — non importa se scritto da IA o da umano",
+    explanation: "Le banche italiane non chiedono mai di «verificare l'identità» tramite link cliccabili. Da 5 anni questa è policy ABI standard. L'IA ha solo reso queste mail più convincenti grammaticalmente — il pattern è lo stesso degli anni '00.",
+    tip: "Mai cliccare. Mai. Vai sul sito della tua banca digitando l'URL manualmente, oppure apri l'app. Le comunicazioni vere sono lì, in chiaro."
+  },
+  {
+    channel: "Articolo su social",
+    content: "«Studio italiano del CNR rivela: bere caffè dopo le 14 protegge dal Parkinson. La ricerca, pubblicata su Nature, ha seguito 3.400 persone per 12 anni. Il professore X invita gli italiani a non rinunciare al caffè pomeridiano.»",
+    answer: "doubt",
+    verdict: "Plausibile ma da verificare — possibile mix di vero + inventato",
+    explanation: "Questa formula esiste in due varianti: ricerca reale travisata, o invenzione plausibile. L'IA ha reso facilissimo produrre articoli che suonano scientifici senza esserlo. Spesso il «professore X» non esiste o non ha mai detto quello.",
+    tip: "Per verificare: 1) cerca il professore su Google Scholar (esiste? ha pubblicazioni recenti?). 2) Cerca lo studio su Nature direttamente, non sul sito che lo cita. 3) Se la notizia è vera, sarà ripresa da fonti scientifiche, non solo da blog di salute."
+  },
+  {
+    channel: "Video TikTok",
+    content: "Un video di 23 secondi mostra il Presidente della Repubblica seduto in uno studio elegante che dice: «Cittadini italiani, è tempo di riconsiderare la nostra posizione sull'Ucraina. Vi parlerò presto.» Voce e movimenti delle labbra sembrano corrispondere.",
+    answer: "fake",
+    verdict: "Deepfake quasi certamente",
+    explanation: "I deepfake di presidenti/leader sono diventati comuni dal 2023. Si riconoscono perché: 1) il contenuto è esplosivo politicamente (è il punto), 2) compare sui social ma non sui media tradizionali, 3) lo studio sembra «tipo TG» ma generico.",
+    tip: "Prima di condividere qualsiasi cosa di un politico: cerca su Google News la frase chiave. Se 5 minuti dopo non c'è nei TG nazionali, è quasi sicuramente falso. I dichiaranti veri compaiono ovunque entro ore."
+  },
+  {
+    channel: "Chiamata telefonica",
+    content: "Una voce identica a quella di tua nipote, in lacrime: «Zio, sono in ospedale, ho fatto un incidente, mi serve aiuto. Non dirlo a mamma. Mi puoi fare un Postepay di €600 ora? Ti richiamo dopo, sto malissimo, ti prego.»",
+    answer: "fake",
+    verdict: "Voice cloning — voce IA addestrata su 30 secondi di voce reale",
+    explanation: "Da 30 secondi di voce (es. da un video Instagram) si genera una replica convincente. Caso documentato dalla Polizia Postale italiana centinaia di volte nel 2024-25. Il pianto è il segnale: rende difficile riconoscere differenze, aumenta urgenza.",
+    tip: "Stabilisci con la famiglia un «codice» — una domanda di cui solo voi conoscete la risposta. Es: «come si chiamava il cane di nonna?». Una persona vera in difficoltà risponderà. Una macchina no."
+  },
+  {
+    channel: "Foto su Instagram",
+    content: "Una foto mostra il sindaco della tua città stretto in un abbraccio con un noto criminale. Le proporzioni sembrano giuste, le ombre coerenti. Viene condivisa con il messaggio: «Ecco le vere amicizie del sindaco».",
+    answer: "fake",
+    verdict: "Foto manipolata/generata — molto difficile da riconoscere a occhio",
+    explanation: "Dal 2024, generare foto fotorealistiche di persone insieme è diventato facile e gratuito. La generazione politica di foto compromettenti è documentata in tutte le elezioni 2024-26. Le ombre e proporzioni vengono gestite bene dall'IA.",
+    tip: "Cerca la foto su Google con «ricerca per immagini». Se è autentica, ci sono altre foto dello stesso momento da angolazioni diverse, articoli che la commentano, contesto. Se è generata, è isolata: esiste solo lì, in quel post."
+  },
+  {
+    channel: "Telefonata da numero italiano",
+    content: "«Pronto, signora? Sono il maresciallo X dei Carabinieri di [tua città]. Suo figlio è stato fermato per un incidente con danni a una persona. La famiglia della vittima chiede €2.500 subito per evitare la denuncia. La situazione è grave ma risolvibile. Le passo l'avvocato.»",
+    answer: "fake",
+    verdict: "Truffa nota da decenni — non serve IA, ma l'IA la potenzia",
+    explanation: "La «truffa del finto carabiniere» è in giro da 30 anni. Ha colpito centinaia di anziani solo nel 2024 in Italia. L'IA la rende più convincente con accenti regionali credibili e voci che cambiano per simulare più «attori» (maresciallo + avvocato + figlio).",
+    tip: "I Carabinieri non chiedono mai soldi al telefono. Mai. In nessun caso. Riattacca, chiama il 112 dal numero che conosci tu, conferma."
+  },
+  {
+    channel: "Articolo scientifico",
+    content: "Una ricerca del 2025 dell'Università di Stanford analizza i dati di 47.000 utenti di un'app per la salute mentale e conclude che chi usa companion AI ha una probabilità del 23% più alta di sviluppare ansia da relazione rispetto al gruppo di controllo.",
+    answer: "real",
+    verdict: "Plausibile — studi simili sono effettivamente usciti nel 2024-25",
+    explanation: "Stanford ha pubblicato diversi studi su questi temi nel 2024-2025. Il dato è coerente con la letteratura emergente (sebbene «23% più alta» sia una percentuale specifica che andrebbe verificata sul paper originale). Non tutto quello che suona «troppo specifico» è falso.",
+    tip: "Anche quando un'affermazione è plausibile, vai sul paper originale prima di citarla. Cerca «Stanford companion AI anxiety 2025 site:stanford.edu» o su Google Scholar. La differenza tra divulgazione corretta e disinformazione è proprio il link al paper."
+  }
+];
+
+let current = 0;
+let answers = [];
+let answered = false;
+
+function renderProgress(){
+  const c = document.getElementById('progress');
+  c.innerHTML = '';
+  CASES.forEach((_, i) => {
+    let cls = 'dot';
+    if(i < current){
+      cls += answers[i] === CASES[i].answer ? ' done correct' : ' done wrong';
+    } else if(i === current) cls += ' current';
+    const d = document.createElement('div');
+    d.className = cls;
+    c.appendChild(d);
+  });
+}
+
+function renderRound(){
+  if(current >= CASES.length){ showResults(); return; }
+  const c = CASES[current];
+  document.getElementById('scenario-label').textContent = `Caso ${current+1} / ${CASES.length}`;
+  document.getElementById('scenario-channel').textContent = `via ${c.channel}`;
+  document.getElementById('scenario-content').textContent = c.content;
+  document.getElementById('reveal').classList.remove('show');
+  ['real','fake','doubt'].forEach(t => {
+    document.querySelector('.choice.' + t).classList.remove('selected','dimmed');
+  });
+  answered = false;
+  renderProgress();
+}
+
+function choose(which){
+  if(answered) return;
+  answered = true;
+  answers.push(which);
+  const correct = CASES[current].answer;
+
+  document.querySelector('.choice.' + which).classList.add('selected');
+  ['real','fake','doubt'].forEach(t => {
+    if(t !== which) document.querySelector('.choice.' + t).classList.add('dimmed');
+  });
+
+  const c = CASES[current];
+  const verdictEl = document.getElementById('reveal-verdict');
+  if(which === correct){
+    verdictEl.textContent = '✓ Hai visto giusto · ' + c.verdict;
+    verdictEl.className = 'reveal-verdict real';
+  } else if(correct === 'doubt'){
+    verdictEl.textContent = '◇ Risposta più prudente: «non si sa» · ' + c.verdict;
+    verdictEl.className = 'reveal-verdict';
+    verdictEl.style.color = 'var(--gold)';
+  } else {
+    verdictEl.textContent = '✗ La risposta era: ' + (correct === 'real' ? 'AUTENTICO' : 'FALSO/IA') + ' · ' + c.verdict;
+    verdictEl.className = 'reveal-verdict fake';
+  }
+
+  document.getElementById('reveal-explanation').textContent = c.explanation;
+  document.getElementById('reveal-tip-text').textContent = c.tip;
+
+  setTimeout(() => {
+    document.getElementById('reveal').classList.add('show');
+  }, 200);
+}
+
+function nextRound(){
+  current++;
+  if(current >= CASES.length){ showResults(); }
+  else { renderRound(); window.scrollTo({top:0, behavior:'smooth'}); }
+}
+
+function showResults(){
+  document.getElementById('round-area').style.display = 'none';
+  document.getElementById('progress').style.display = 'none';
+  const correct = answers.filter((a, i) => a === CASES[i].answer).length;
+  document.getElementById('score').textContent = `${correct}/${CASES.length}`;
+
+  let title, body;
+  if(correct >= 7){
+    title = "Occhio molto allenato";
+    body = "Hai riconosciuto la maggior parte dei segnali. Hai probabilmente già un sistema personale di verifica. Il rischio per te: pensare che gli altri (anziani, persone meno alfabetizzate) abbiano lo stesso occhio. Non lo hanno. La tua responsabilità è proteggerli.";
+  } else if(correct >= 5){
+    title = "Sei sopra la media";
+    body = "Riconosci i pattern più evidenti. Quelli sottili — voce di un familiare, articoli scientifici plausibili — ti hanno colto. È normale: nel 2026, il problema non è più «accorgersi», è non doversi fidare. Sviluppa un protocollo di verifica per le richieste urgenti.";
+  } else if(correct >= 3){
+    title = "Hai bisogno di un protocollo";
+    body = "Non è un giudizio: significa che hai un occhio normale, allenato al pre-2023. Il mondo è cambiato. La cosa da costruire non è «riconoscere a vista» (sempre più difficile), ma una routine di verifica che ti protegga anche quando non riconosci.";
+  } else {
+    title = "Sei un bersaglio facile, e non per colpa tua";
+    body = "L'IA ha alzato l'asticella oltre quello che è ragionevole chiedere a un occhio non specializzato. Il punto non è «imparare a riconoscere», è cambiare le abitudini. Le tre regole base nel riquadro qui sotto sono il punto di partenza concreto.";
+  }
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-body').textContent = body;
+  document.getElementById('results').classList.add('show');
+}
+
+function restart(){
+  current = 0; answers = []; answered = false;
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('round-area').style.display = 'block';
+  document.getElementById('progress').style.display = 'flex';
+  renderRound();
+  window.scrollTo({top:0});
+}
+
+renderRound();
+</script>
+</body>
+</html>

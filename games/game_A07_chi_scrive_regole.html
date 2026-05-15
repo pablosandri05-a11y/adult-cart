@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Trade-off Console · PINA A07</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@400;500;600;700&family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0F1729;--surf:#1A2540;--surf2:#243154;--teal:#00D4AA;--copper:#E8845C;--gold:#FFD166;--cream:#F4EBDD;--muted:#8899BB;--line:rgba(244,235,221,.12);--violet:#A78BFA}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--cream);font-size:16px;line-height:1.5;min-height:100vh}
+.app{max-width:560px;margin:0 auto;padding:24px 18px 60px}
+.header{margin-bottom:22px}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--teal);font-weight:700;text-transform:uppercase;margin-bottom:8px}
+h1{font-family:'Newsreader',serif;font-weight:500;font-size:30px;line-height:1.1;letter-spacing:-.5px}
+.intro{margin-top:14px;color:var(--muted);font-size:14.5px;line-height:1.55}
+
+.budget-meter{margin:18px 0 22px;padding:16px 18px;background:var(--surf2);border-radius:12px}
+.budget-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.budget-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;font-weight:700}
+.budget-value{font-family:'Newsreader',serif;font-size:22px;font-weight:600;color:var(--gold)}
+.budget-value.ok{color:var(--teal)}
+.budget-value.over{color:var(--copper)}
+.budget-bar{height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.budget-fill{height:100%;background:var(--gold);transition:width .3s ease, background .3s ease}
+.budget-fill.ok{background:var(--teal)}
+.budget-fill.over{background:var(--copper)}
+.budget-hint{margin-top:8px;font-size:12px;color:var(--muted);line-height:1.45}
+
+.sliders{display:flex;flex-direction:column;gap:18px}
+.slider-card{background:var(--surf);border-radius:14px;padding:18px 18px 16px;border:1px solid var(--line);transition:border-color .2s}
+.slider-card.active{border-color:var(--teal)}
+.slider-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.slider-name{font-family:'Newsreader',serif;font-size:17px;font-weight:500;color:var(--cream)}
+.slider-value{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;letter-spacing:.5px}
+.slider-desc{font-size:12.5px;line-height:1.45;color:var(--muted);margin-bottom:12px;font-style:italic}
+.slider{-webkit-appearance:none;appearance:none;width:100%;height:8px;background:var(--surf2);border-radius:4px;outline:none}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid var(--bg);box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.slider::-moz-range-thumb{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid var(--bg);box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.slider-card[data-color="teal"] .slider::-webkit-slider-thumb,
+.slider-card[data-color="teal"] .slider::-moz-range-thumb{background:var(--teal)}
+.slider-card[data-color="teal"] .slider-value{color:var(--teal)}
+.slider-card[data-color="copper"] .slider::-webkit-slider-thumb,
+.slider-card[data-color="copper"] .slider::-moz-range-thumb{background:var(--copper)}
+.slider-card[data-color="copper"] .slider-value{color:var(--copper)}
+.slider-card[data-color="gold"] .slider::-webkit-slider-thumb,
+.slider-card[data-color="gold"] .slider::-moz-range-thumb{background:var(--gold)}
+.slider-card[data-color="gold"] .slider-value{color:var(--gold)}
+.slider-card[data-color="violet"] .slider::-webkit-slider-thumb,
+.slider-card[data-color="violet"] .slider::-moz-range-thumb{background:var(--violet)}
+.slider-card[data-color="violet"] .slider-value{color:var(--violet)}
+
+.tradeoff-display{margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.5px;color:var(--muted);min-height:14px;line-height:1.4}
+.tradeoff-display.warn{color:var(--copper)}
+
+.btn{display:block;width:100%;padding:15px 18px;border-radius:12px;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:.15s;margin-top:22px}
+.btn-primary{background:var(--teal);color:var(--bg)}
+.btn-primary:active{transform:scale(.98)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line);margin-top:10px}
+
+.results{display:none;margin-top:6px}
+.results.show{display:block}
+.result-hero{background:linear-gradient(135deg,var(--surf2),var(--surf));border-radius:18px;padding:26px 22px;margin-bottom:18px}
+.result-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;font-weight:800;margin-bottom:8px}
+.result-title{font-family:'Newsreader',serif;font-size:24px;font-weight:500;color:var(--cream);margin-bottom:12px;line-height:1.25}
+.result-body{font-size:14.5px;line-height:1.6;color:var(--cream);opacity:.92}
+.result-body p{margin-bottom:10px}
+
+.profile-bars{margin:18px 0;display:flex;flex-direction:column;gap:8px}
+.profile-row{display:flex;align-items:center;gap:10px}
+.profile-name{flex:0 0 90px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.8px;text-transform:uppercase;font-weight:700}
+.profile-bar{flex:1;height:14px;background:var(--surf);border-radius:7px;overflow:hidden;position:relative}
+.profile-bar-fill{height:100%;border-radius:7px;transition:width .6s ease}
+.profile-val{flex:0 0 30px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;text-align:right}
+
+.takeaway{background:rgba(0,212,170,.08);border-left:3px solid var(--teal);padding:16px;border-radius:0 12px 12px 0;margin-bottom:18px}
+.takeaway-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--teal);margin-bottom:6px;text-transform:uppercase;font-weight:800}
+.takeaway p{font-size:13.5px;line-height:1.55}
+
+.footer{margin-top:32px;padding-top:18px;border-top:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;text-align:center}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="eyebrow">PINA · CARD A07 · DISCUSSIONE</div>
+    <h1>Trade-off Console</h1>
+    <div class="intro">Hai un budget di <strong style="color:var(--gold)">200 punti</strong> da distribuire tra quattro valori che la regolamentazione AI dovrebbe difendere. Non puoi averli tutti al massimo: ogni scelta esclude qualcos'altro. Trova la tua configurazione.</div>
+  </div>
+
+  <div class="budget-meter">
+    <div class="budget-top">
+      <span class="budget-label">▸ Punti distribuiti / 200</span>
+      <span class="budget-value" id="budget-value">0</span>
+    </div>
+    <div class="budget-bar"><div class="budget-fill" id="budget-fill" style="width:0"></div></div>
+    <div class="budget-hint" id="budget-hint">Sposta gli slider. Il totale deve essere esattamente 200.</div>
+  </div>
+
+  <div class="sliders" id="sliders-container">
+    <div class="slider-card" data-color="teal" data-key="innovation">
+      <div class="slider-head">
+        <span class="slider-name">Innovazione</span>
+        <span class="slider-value">50</span>
+      </div>
+      <div class="slider-desc">Velocità di sviluppo, ricerca libera, competitività internazionale</div>
+      <input type="range" min="0" max="100" value="50" class="slider" oninput="onSlide()">
+      <div class="tradeoff-display"></div>
+    </div>
+
+    <div class="slider-card" data-color="copper" data-key="equity">
+      <div class="slider-head">
+        <span class="slider-name">Equità</span>
+        <span class="slider-value">50</span>
+      </div>
+      <div class="slider-desc">Protezione contro discriminazione algoritmica, accessibilità, riduzione disuguaglianze</div>
+      <input type="range" min="0" max="100" value="50" class="slider" oninput="onSlide()">
+      <div class="tradeoff-display"></div>
+    </div>
+
+    <div class="slider-card" data-color="gold" data-key="safety">
+      <div class="slider-head">
+        <span class="slider-name">Sicurezza</span>
+        <span class="slider-value">50</span>
+      </div>
+      <div class="slider-desc">Controllo dei rischi, audit obbligatori, prevenzione di usi malevoli</div>
+      <input type="range" min="0" max="100" value="50" class="slider" oninput="onSlide()">
+      <div class="tradeoff-display"></div>
+    </div>
+
+    <div class="slider-card" data-color="violet" data-key="sovereignty">
+      <div class="slider-head">
+        <span class="slider-name">Sovranità</span>
+        <span class="slider-value">50</span>
+      </div>
+      <div class="slider-desc">Indipendenza tecnologica nazionale/europea, riduzione dipendenza da Big Tech estera</div>
+      <input type="range" min="0" max="100" value="50" class="slider" oninput="onSlide()">
+      <div class="tradeoff-display"></div>
+    </div>
+  </div>
+
+  <button class="btn btn-primary" id="submit-btn" onclick="showProfile()" disabled>Vedi il tuo profilo</button>
+
+  <div class="results" id="results">
+    <div class="result-hero">
+      <div class="result-label">▸ La tua politica AI implicita</div>
+      <div class="result-title" id="profile-title"></div>
+      <div class="profile-bars" id="profile-bars"></div>
+      <div class="result-body" id="profile-body"></div>
+    </div>
+
+    <div class="takeaway">
+      <div class="takeaway-label">▸ Da portarsi a casa</div>
+      <p>Non c'è una distribuzione «giusta». Ogni scelta privilegia qualcosa a scapito di qualcos'altro. Il dibattito pubblico sull'AI non è tecnico: è politico. Ogni regolamentazione — l'EU AI Act, le policy USA, l'approccio cinese — è un'allocazione specifica di questo budget. La domanda da portarsi a casa: <em>chi sta facendo queste scelte al posto tuo, in questo momento?</em></p>
+    </div>
+
+    <button class="btn btn-ghost" onclick="restart()">Ricominciare</button>
+  </div>
+
+  <div class="footer">PINA AI LITERACY · ADULT · A07</div>
+</div>
+
+<script>
+const TARGET = 200;
+const KEYS = ['innovation', 'equity', 'safety', 'sovereignty'];
+
+const TRADEOFFS = {
+  // se A è alto, B subisce; messaggio mostrato
+  innovation: {
+    equity: "L'innovazione veloce tende a creare diseguaglianze nei primi anni di diffusione.",
+    safety: "Sviluppo accelerato → meno tempo per audit di sicurezza.",
+    sovereignty: "Stare al passo richiede spesso di dipendere da chi corre più forte."
+  },
+  equity: {
+    innovation: "Garantire equità rallenta la sperimentazione.",
+    safety: "Le tutele anti-discriminazione e i sistemi di audit sicurezza competono per le stesse risorse.",
+    sovereignty: "Standard di equità europei possono allontanare investitori globali."
+  },
+  safety: {
+    innovation: "Audit, certificazioni e moratorie frenano il time-to-market.",
+    equity: "Risorse di sicurezza orientate a danni acuti possono trascurare bias sistemici.",
+    sovereignty: "Standard di sicurezza alti possono dipendere da expertise concentrata altrove."
+  },
+  sovereignty: {
+    innovation: "Costruire autonomia tecnologica costa tempo e duplica investimenti.",
+    equity: "Politiche di sovranità rischiano di favorire campioni nazionali a scapito di startup diverse.",
+    safety: "Voler fare tutto in casa significa rinunciare a expertise sviluppata altrove."
+  }
+};
+
+function getValues(){
+  const v = {};
+  document.querySelectorAll('.slider-card').forEach(card => {
+    v[card.dataset.key] = parseInt(card.querySelector('.slider').value);
+  });
+  return v;
+}
+
+function onSlide(){
+  const v = getValues();
+  const total = v.innovation + v.equity + v.safety + v.sovereignty;
+
+  // budget
+  const bv = document.getElementById('budget-value');
+  const bf = document.getElementById('budget-fill');
+  const bh = document.getElementById('budget-hint');
+  bv.textContent = total;
+  bv.className = 'budget-value';
+  bf.className = 'budget-fill';
+  bf.style.width = Math.min(100, total / TARGET * 100) + '%';
+
+  if(total === TARGET){
+    bv.classList.add('ok');
+    bf.classList.add('ok');
+    bh.textContent = '✓ Distribuzione completa. Vedi il tuo profilo qui sotto.';
+    document.getElementById('submit-btn').disabled = false;
+  } else if(total > TARGET){
+    bv.classList.add('over');
+    bf.classList.add('over');
+    bh.textContent = `Hai usato ${total - TARGET} punti in più. Riduci uno o più valori.`;
+    document.getElementById('submit-btn').disabled = true;
+  } else {
+    bh.textContent = `Mancano ${TARGET - total} punti. Distribuisci tutto il budget.`;
+    document.getElementById('submit-btn').disabled = true;
+  }
+
+  // update values displayed + tradeoff messages
+  document.querySelectorAll('.slider-card').forEach(card => {
+    const k = card.dataset.key;
+    const val = v[k];
+    card.querySelector('.slider-value').textContent = val;
+    // mostra trade-off solo se valore alto
+    const td = card.querySelector('.tradeoff-display');
+    if(val >= 70){
+      // trova il valore più basso tra gli altri 3
+      const others = KEYS.filter(x => x !== k);
+      const lowest = others.reduce((a,b) => v[a] < v[b] ? a : b);
+      if(v[lowest] <= 30){
+        td.textContent = '↘ ' + TRADEOFFS[k][lowest];
+        td.classList.add('warn');
+      } else {
+        td.textContent = '';
+        td.classList.remove('warn');
+      }
+    } else {
+      td.textContent = '';
+      td.classList.remove('warn');
+    }
+  });
+}
+
+const PROFILE_NAMES = {
+  innovation: 'INNOVAZIONE',
+  equity: 'EQUITÀ',
+  safety: 'SICUREZZA',
+  sovereignty: 'SOVRANITÀ'
+};
+const PROFILE_COLORS = {
+  innovation: 'var(--teal)',
+  equity: 'var(--copper)',
+  safety: 'var(--gold)',
+  sovereignty: 'var(--violet)'
+};
+
+function getProfileLabel(v){
+  // ordina valori dal più alto al più basso
+  const sorted = KEYS.map(k => ({k, v: v[k]})).sort((a,b) => b.v - a.v);
+  const top = sorted[0];
+  const second = sorted[1];
+
+  // profili archetipici
+  if(top.v >= 80){
+    return getMaxProfile(top.k);
+  } else if(top.v - sorted[3].v < 15){
+    return {
+      title: "Equilibrista",
+      body: "<p>Hai distribuito quasi uniformemente. È la posizione più rara nel dibattito reale: in pratica, i policymaker DEVONO scegliere perché le risorse e l'attenzione politica sono limitate. La tua configurazione è democraticamente «giusta» ma operativamente difficile da realizzare.</p><p>Il rischio dell'equilibrismo è la paralisi. La forza è non avere zone cieche.</p>"
+    };
+  } else {
+    // mix di top 2
+    return getMixProfile(top.k, second.k);
+  }
+}
+
+function getMaxProfile(key){
+  const profiles = {
+    innovation: {
+      title: "Acceleratore",
+      body: "<p>Privilegi l'innovazione sopra tutto. È la posizione tipica del settore tech USA, della Silicon Valley, e di parte della classe dirigente cinese.</p><p>La promessa: senza spinta, l'AI europea sarà sempre subordinata e non avremo seduti ai tavoli giusti. Il rischio: ogni «correggiamo dopo» nella storia delle tecnologie potenti è stata una promessa non mantenuta. I danni si normalizzano prima che la correzione arrivi.</p>"
+    },
+    equity: {
+      title: "Egalitario",
+      body: "<p>Privilegi l'equità. È una posizione vicina ai movimenti civici, sindacali, e a parte del Sud globale.</p><p>La promessa: una tecnologia che ricalca le ingiustizie esistenti non è progresso, è automazione del privilegio. Il rischio: standard troppo stringenti di equità tendono a essere applicati nei paesi che li scrivono — non in quelli che producono tecnologie senza vincoli. Si rischia di proteggere chi è già protetto.</p>"
+    },
+    safety: {
+      title: "Prudente",
+      body: "<p>Privilegi la sicurezza. È la posizione dei laboratori di safety AI, di parte della comunità scientifica, della UE.</p><p>La promessa: tecnologie generaliste con effetti su miliardi richiedono cautela proporzionata al potenziale danno. Il rischio: «sicurezza» è spesso definita da chi ha già potere, e diventa strumento per fermare la concorrenza più piccola che non può permettersi i costi di compliance.</p>"
+    },
+    sovereignty: {
+      title: "Sovranista",
+      body: "<p>Privilegi l'autonomia tecnologica. È la posizione di parte dei governi europei (Macron, Meloni in parte), dei nazionalisti tecnologici cinesi, di alcuni movimenti indiani.</p><p>La promessa: dipendere da sei aziende americane per un'infrastruttura cognitiva è un suicidio strategico. Il rischio: la sovranità senza scala produce tecnologia di seconda fascia, e «autonomia» può diventare cattura nazionalista da parte di campioni industriali domestici.</p>"
+    }
+  };
+  return profiles[key];
+}
+
+function getMixProfile(a, b){
+  // composti più comuni
+  const combos = {
+    'innovation_safety': {
+      title: "Acceleratore prudente",
+      body: "<p>Vuoi velocità ma con paracadute. È la posizione esplicita di Anthropic, parte dell'ecosistema di safety industriale, e in modo più ambiguo OpenAI nelle dichiarazioni pubbliche.</p><p>La tensione: la velocità di mercato e il rigore dei controlli sono in conflitto strutturale, non rettorico. Nel concreto, queste due si bilanciano solo se le imprese internalizzano i costi del rigore — cosa che il mercato libero scoraggia.</p>"
+    },
+    'safety_innovation': {
+      title: "Acceleratore prudente",
+      body: "<p>Vuoi velocità ma con paracadute. È la posizione esplicita di Anthropic, parte dell'ecosistema di safety industriale, e in modo più ambiguo OpenAI nelle dichiarazioni pubbliche.</p><p>La tensione: la velocità di mercato e il rigore dei controlli sono in conflitto strutturale, non rettorico. Nel concreto, queste due si bilanciano solo se le imprese internalizzano i costi del rigore — cosa che il mercato libero scoraggia.</p>"
+    },
+    'equity_safety': {
+      title: "Difensore civile",
+      body: "<p>Vuoi proteggere persone (dalle discriminazioni) e collettività (dai danni). È la posizione di una parte del mondo regolatorio europeo, di alcune ONG, della società civile organizzata.</p><p>La tensione: «equità» e «sicurezza» sembrano allineate ma in pratica competono per attenzione politica e risorse. La sicurezza fa più notizia (un drone, una crisi), l'equità è strutturale e quotidiana — e tende a essere sacrificata quando i budget si stringono.</p>"
+    },
+    'safety_equity': {
+      title: "Difensore civile",
+      body: "<p>Vuoi proteggere persone (dalle discriminazioni) e collettività (dai danni). È la posizione di una parte del mondo regolatorio europeo, di alcune ONG, della società civile organizzata.</p><p>La tensione: «equità» e «sicurezza» sembrano allineate ma in pratica competono per attenzione politica e risorse. La sicurezza fa più notizia (un drone, una crisi), l'equità è strutturale e quotidiana — e tende a essere sacrificata quando i budget si stringono.</p>"
+    },
+    'innovation_sovereignty': {
+      title: "Patriota tecnologico",
+      body: "<p>Vuoi correre, ma in casa. È la posizione esplicita della politica industriale francese, italiana (Strategia AI 2024-26), parte del dibattito tedesco e quasi tutta la politica industriale cinese.</p><p>La tensione: «innovazione» e «sovranità» convivono solo con investimenti enormi e protezionismo selettivo. L'Europa non ha ancora dimostrato di poterlo fare; la Cina sì, ma a costi politici elevati.</p>"
+    },
+    'sovereignty_innovation': {
+      title: "Patriota tecnologico",
+      body: "<p>Vuoi correre, ma in casa. È la posizione esplicita della politica industriale francese, italiana (Strategia AI 2024-26), parte del dibattito tedesco e quasi tutta la politica industriale cinese.</p><p>La tensione: «innovazione» e «sovranità» convivono solo con investimenti enormi e protezionismo selettivo. L'Europa non ha ancora dimostrato di poterlo fare; la Cina sì, ma a costi politici elevati.</p>"
+    },
+    'equity_sovereignty': {
+      title: "Comunitarista",
+      body: "<p>Vuoi società giuste E autonome. È una posizione meno mainstream ma presente in parte del pensiero europeo di sinistra, in alcuni movimenti del Sud globale, e in pensatori come Stiegler.</p><p>La tensione: equità e sovranità nazionale sono in conflitto storico — l'equità tende a essere internazionalista, la sovranità tende ad essere identitaria. Tenerle insieme richiede una visione politica chiara.</p>"
+    },
+    'sovereignty_equity': {
+      title: "Comunitarista",
+      body: "<p>Vuoi società giuste E autonome. È una posizione meno mainstream ma presente in parte del pensiero europeo di sinistra, in alcuni movimenti del Sud globale, e in pensatori come Stiegler.</p><p>La tensione: equità e sovranità nazionale sono in conflitto storico — l'equità tende a essere internazionalista, la sovranità tende ad essere identitaria. Tenerle insieme richiede una visione politica chiara.</p>"
+    },
+    'innovation_equity': {
+      title: "Progressista techno",
+      body: "<p>Vuoi velocità + giustizia, e poco interesse per rischi e sovranità. È una posizione che si trova nel mondo del tech etico, in alcuni movimenti di democratizzazione dell'AI (open source), nei sostenitori dell'AI «come utility pubblica».</p><p>La tensione: senza priorità sulla sicurezza e sull'autonomia, l'innovazione equa tende a essere catturata da chi corre più forte — anche se vendono il discorso egualitario.</p>"
+    },
+    'equity_innovation': {
+      title: "Progressista techno",
+      body: "<p>Vuoi velocità + giustizia, e poco interesse per rischi e sovranità. È una posizione che si trova nel mondo del tech etico, in alcuni movimenti di democratizzazione dell'AI (open source), nei sostenitori dell'AI «come utility pubblica».</p><p>La tensione: senza priorità sulla sicurezza e sull'autonomia, l'innovazione equa tende a essere catturata da chi corre più forte — anche se vendono il discorso egualitario.</p>"
+    },
+    'safety_sovereignty': {
+      title: "Cauto e autonomo",
+      body: "<p>Vuoi prudenza e indipendenza. È vicino alla posizione di parte del mondo militare e dell'intelligence europei, e in alcuni movimenti accademici di AI safety.</p><p>La tensione: «sicurezza» e «sovranità» insieme tendono a chiudere il sistema. È efficace contro le minacce esterne, ma fragile rispetto all'innovazione interna. Il rischio: una tecnologia stagnante è anche una tecnologia insicura nel lungo periodo.</p>"
+    },
+    'sovereignty_safety': {
+      title: "Cauto e autonomo",
+      body: "<p>Vuoi prudenza e indipendenza. È vicino alla posizione di parte del mondo militare e dell'intelligence europei, e in alcuni movimenti accademici di AI safety.</p><p>La tensione: «sicurezza» e «sovranità» insieme tendono a chiudere il sistema. È efficace contro le minacce esterne, ma fragile rispetto all'innovazione interna. Il rischio: una tecnologia stagnante è anche una tecnologia insicura nel lungo periodo.</p>"
+    }
+  };
+  return combos[`${a}_${b}`] || combos[`${b}_${a}`];
+}
+
+function showProfile(){
+  const v = getValues();
+  const profile = getProfileLabel(v);
+
+  document.getElementById('profile-title').textContent = profile.title;
+  document.getElementById('profile-body').innerHTML = profile.body;
+
+  // profile bars
+  const bars = document.getElementById('profile-bars');
+  bars.innerHTML = '';
+  KEYS.forEach(k => {
+    const val = v[k];
+    const row = document.createElement('div');
+    row.className = 'profile-row';
+    row.innerHTML = `
+      <div class="profile-name" style="color:${PROFILE_COLORS[k]}">${PROFILE_NAMES[k]}</div>
+      <div class="profile-bar"><div class="profile-bar-fill" style="background:${PROFILE_COLORS[k]};width:${val}%"></div></div>
+      <div class="profile-val" style="color:${PROFILE_COLORS[k]}">${val}</div>
+    `;
+    bars.appendChild(row);
+  });
+
+  document.getElementById('results').classList.add('show');
+  window.scrollTo({top: document.getElementById('results').offsetTop - 20, behavior: 'smooth'});
+}
+
+function restart(){
+  document.querySelectorAll('.slider-card').forEach(card => {
+    card.querySelector('.slider').value = 50;
+  });
+  document.getElementById('results').classList.remove('show');
+  onSlide();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+onSlide();
+</script>
+</body>
+</html>

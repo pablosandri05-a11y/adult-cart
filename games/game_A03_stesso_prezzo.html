@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Position Tracker · PINA A03</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@400;500;600;700&family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0F1729;--surf:#1A2540;--surf2:#243154;--teal:#00D4AA;--copper:#E8845C;--gold:#FFD166;--cream:#F4EBDD;--muted:#8899BB;--line:rgba(244,235,221,.12)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--cream);font-size:16px;line-height:1.5;min-height:100vh}
+.app{max-width:540px;margin:0 auto;padding:24px 18px 60px}
+.header{margin-bottom:24px}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--teal);font-weight:700;text-transform:uppercase;margin-bottom:8px}
+h1{font-family:'Newsreader',serif;font-weight:500;font-size:30px;line-height:1.1;letter-spacing:-.5px}
+.intro{margin-top:14px;color:var(--muted);font-size:14.5px}
+
+.progress{display:flex;gap:4px;margin:20px 0 18px}
+.dot{flex:1;height:4px;background:var(--surf);border-radius:2px;transition:.25s}
+.dot.done{background:var(--teal)}
+.dot.current{background:var(--copper)}
+
+.card{background:var(--surf);border-radius:14px;padding:22px 20px;border:1px solid var(--line);margin-bottom:16px}
+.card-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--copper);text-transform:uppercase;font-weight:700;margin-bottom:10px}
+.card-text{font-family:'Newsreader',serif;font-size:17px;line-height:1.45;font-style:italic}
+
+.slider-wrap{background:var(--surf);border-radius:14px;padding:20px 20px 18px;margin-bottom:18px}
+.slider-labels{display:flex;justify-content:space-between;margin-bottom:10px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;font-weight:700}
+.slider-labels .left{color:var(--copper)}
+.slider-labels .right{color:var(--teal)}
+
+.slider{-webkit-appearance:none;appearance:none;width:100%;height:8px;background:linear-gradient(to right,var(--copper) 0%,var(--surf2) 50%,var(--teal) 100%);border-radius:4px;outline:none;margin:6px 0}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;background:var(--cream);border-radius:50%;cursor:pointer;border:3px solid var(--bg);box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.slider::-moz-range-thumb{width:28px;height:28px;background:var(--cream);border-radius:50%;cursor:pointer;border:3px solid var(--bg);box-shadow:0 2px 8px rgba(0,0,0,.4)}
+
+.slider-value{text-align:center;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;color:var(--muted);margin-top:8px;text-transform:uppercase}
+.slider-value strong{color:var(--cream);font-size:13px}
+
+.btn{display:block;width:100%;padding:15px 18px;border-radius:12px;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:.15s}
+.btn-primary{background:var(--teal);color:var(--bg)}
+.btn-primary:active{transform:scale(.98)}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line);margin-top:10px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+.results{display:none}
+.results.show{display:block}
+
+.result-hero{background:linear-gradient(135deg,var(--surf2),var(--surf));border-radius:18px;padding:26px 22px;margin-bottom:18px}
+.result-hero-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--gold);margin-bottom:14px;text-transform:uppercase}
+.result-line{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.result-line-text{flex:1;font-size:13.5px;line-height:1.4}
+.result-line-bar{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);min-width:56px}
+.bar-track{position:relative;height:24px;background:var(--surf);border-radius:4px;margin:10px 0 22px;overflow:hidden}
+.bar-line{position:absolute;top:0;left:50%;width:1px;height:100%;background:var(--line)}
+.bar-fill-pos{position:absolute;top:0;left:50%;height:100%;background:var(--teal);opacity:.55;transition:width .8s ease-out}
+.bar-fill-neg{position:absolute;top:0;right:50%;height:100%;background:var(--copper);opacity:.55;transition:width .8s ease-out}
+.bar-marks{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:-18px;margin-bottom:8px}
+
+.scenario-row{padding:14px 0;border-bottom:1px solid var(--line)}
+.scenario-row:last-child{border-bottom:none}
+.scenario-title{font-size:13.5px;line-height:1.45;margin-bottom:6px}
+.scenario-mini-bar{position:relative;height:8px;background:var(--surf);border-radius:4px}
+.scenario-mini-mark{position:absolute;top:-3px;width:4px;height:14px;background:var(--cream);border-radius:1px;transform:translateX(-2px)}
+.scenario-mini-zero{position:absolute;top:0;left:50%;width:1px;height:100%;background:var(--muted);opacity:.3}
+
+.footer{margin-top:32px;padding-top:18px;border-top:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;text-align:center}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="eyebrow">PINA · CARD A03 · DISCUSSIONE</div>
+    <h1>Position Tracker</h1>
+    <div class="intro">Otto scenari di prezzo. Per ognuno, posiziona il cursore. A fine vedi la tua mappa.</div>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <div id="round-area">
+    <div class="card">
+      <div class="card-label" id="scenario-label">Scenario 1 / 8</div>
+      <div class="card-text" id="scenario-text"></div>
+    </div>
+
+    <div class="slider-wrap">
+      <div class="slider-labels">
+        <span class="left">◀ Inaccettabile</span>
+        <span class="right">Accettabile ▶</span>
+      </div>
+      <input type="range" min="-100" max="100" value="0" class="slider" id="slider" oninput="onSlide()">
+      <div class="slider-value" id="slider-value"><strong>0</strong> · neutro</div>
+    </div>
+
+    <button class="btn btn-primary" id="next-btn" onclick="nextRound()">Avanti →</button>
+  </div>
+
+  <div class="results" id="results">
+    <div class="result-hero">
+      <div class="result-hero-label">▸ La tua mappa etica del pricing</div>
+      <div id="scenarios-recap"></div>
+    </div>
+
+    <div class="card" style="background:rgba(232,132,92,.08);border-left:3px solid var(--copper)">
+      <div class="card-label" style="color:var(--copper)">▸ Cosa hai mostrato di te</div>
+      <div id="profile-text" style="font-size:14.5px;font-style:normal;line-height:1.6"></div>
+    </div>
+
+    <button class="btn btn-ghost" onclick="restart()">Ricominciare</button>
+  </div>
+
+  <div class="footer">PINA AI LITERACY · ADULT · A03</div>
+</div>
+
+<script>
+const SCENARIOS = [
+  {text:"Sconto del 20% per studenti universitari su un libro di testo."},
+  {text:"Saldi stagionali: 30% in meno su tutto, stesso prezzo per chiunque entri nel negozio."},
+  {text:"Uber che alza la tariffa del 60% durante la pioggia o l'ora di punta."},
+  {text:"Un sito di viaggi mostra prezzi più alti se accedi da un iPhone (statisticamente cliente più abbiente)."},
+  {text:"Un'app di delivery aumenta il prezzo del singolo prodotto se la tua app rileva fame: ora tardi, posizione vicino a casa, frequenti ordini serali."},
+  {text:"L'assicurazione auto calcola il premio in base a guida monitorata: chi guida male paga di più, chi guida bene paga di meno."},
+  {text:"La banca propone tasso del mutuo personalizzato in base al «profilo finanziario complessivo» — lavoro, abitudini di spesa, contatti social."},
+  {text:"Una piattaforma di e-commerce mostra a ogni persona un prezzo unico, calcolato in tempo reale dall'IA per massimizzare il pagato. Mai due clienti vedono lo stesso prezzo."}
+];
+
+let current = 0;
+let scores = [];
+
+function renderProgress(){
+  const c = document.getElementById('progress');
+  c.innerHTML = '';
+  SCENARIOS.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < current ? ' done' : i === current ? ' current' : '');
+    c.appendChild(d);
+  });
+}
+
+function renderRound(){
+  if(current >= SCENARIOS.length){ showResults(); return; }
+  document.getElementById('scenario-label').textContent = `Scenario ${current+1} / ${SCENARIOS.length}`;
+  document.getElementById('scenario-text').textContent = SCENARIOS[current].text;
+  document.getElementById('slider').value = 0;
+  onSlide();
+  renderProgress();
+}
+
+function onSlide(){
+  const v = parseInt(document.getElementById('slider').value);
+  let label = 'neutro';
+  if(v > 70) label = 'pienamente accettabile';
+  else if(v > 30) label = 'accettabile';
+  else if(v > 5) label = 'tendenzialmente ok';
+  else if(v >= -5) label = 'neutro / indeciso';
+  else if(v > -30) label = 'tendenzialmente no';
+  else if(v > -70) label = 'inaccettabile';
+  else label = 'pienamente inaccettabile';
+  document.getElementById('slider-value').innerHTML = `<strong>${v > 0 ? '+' : ''}${v}</strong> · ${label}`;
+}
+
+function nextRound(){
+  scores.push(parseInt(document.getElementById('slider').value));
+  current++;
+  if(current >= SCENARIOS.length){ showResults(); }
+  else { renderRound(); window.scrollTo({top:0,behavior:'smooth'}); }
+}
+
+function showResults(){
+  document.getElementById('round-area').style.display = 'none';
+  document.getElementById('progress').style.display = 'none';
+
+  // recap singoli scenari
+  const recap = document.getElementById('scenarios-recap');
+  recap.innerHTML = '';
+  SCENARIOS.forEach((s, i) => {
+    const row = document.createElement('div');
+    row.className = 'scenario-row';
+    const score = scores[i];
+    const pos = ((score + 100) / 2); // 0..100
+    row.innerHTML = `
+      <div class="scenario-title">${i+1}. ${s.text}</div>
+      <div class="scenario-mini-bar">
+        <div class="scenario-mini-zero"></div>
+        <div class="scenario-mini-mark" style="left:${pos}%; background:${score > 5 ? 'var(--teal)' : score < -5 ? 'var(--copper)' : 'var(--cream)'}"></div>
+      </div>
+    `;
+    recap.appendChild(row);
+  });
+
+  // profilo
+  const avg = scores.reduce((a,b)=>a+b,0) / scores.length;
+  const accept = scores.filter(s => s > 30).length;
+  const reject = scores.filter(s => s < -30).length;
+  let profile;
+  if(avg > 25){
+    profile = `Tendi ad <strong style="color:var(--teal)">accettare</strong> i meccanismi di pricing algoritmico (media ${avg.toFixed(0)}). Probabilmente vedi il mercato come trasparente, l'efficienza come valore, la personalizzazione come vantaggio. Domanda da portare a casa: <em>cosa ti fa cambiare opinione tra L1 e L8?</em>`;
+  } else if(avg < -25){
+    profile = `Sei <strong style="color:var(--copper)">scettico/a</strong> rispetto al pricing algoritmico (media ${avg.toFixed(0)}). Vedi la personalizzazione come discriminazione potenziale e l'opacità come problema politico. Domanda: <em>quali condizioni renderebbero accettabili le pratiche che hai rifiutato?</em>`;
+  } else {
+    profile = `Hai un atteggiamento <strong style="color:var(--gold)">selettivo</strong> (media ${avg.toFixed(0)}): hai accettato ${accept} scenari e rifiutato ${reject}. La tua linea è dove c'è qualcosa di specifico: probabilmente la trasparenza, il consenso, o il tipo di dato usato. Identifica la regola implicita che hai applicato.`;
+  }
+  document.getElementById('profile-text').innerHTML = profile;
+  document.getElementById('results').classList.add('show');
+}
+
+function restart(){
+  current = 0; scores = [];
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('round-area').style.display = 'block';
+  document.getElementById('progress').style.display = 'flex';
+  renderRound();
+  window.scrollTo({top:0});
+}
+
+renderRound();
+</script>
+</body>
+</html>

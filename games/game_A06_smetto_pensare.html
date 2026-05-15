@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Cognitive Audit · PINA A06</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@400;500;600;700&family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0F1729;--surf:#1A2540;--surf2:#243154;--teal:#00D4AA;--copper:#E8845C;--gold:#FFD166;--cream:#F4EBDD;--muted:#8899BB;--line:rgba(244,235,221,.12)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--cream);font-size:16px;line-height:1.5;min-height:100vh}
+.app{max-width:560px;margin:0 auto;padding:24px 18px 60px}
+.header{margin-bottom:24px}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--teal);font-weight:700;text-transform:uppercase;margin-bottom:8px}
+h1{font-family:'Newsreader',serif;font-weight:500;font-size:30px;line-height:1.1;letter-spacing:-.5px}
+.intro{margin-top:14px;color:var(--muted);font-size:14.5px}
+
+.progress{display:flex;gap:4px;margin:20px 0 18px}
+.dot{flex:1;height:4px;background:var(--surf);border-radius:2px;transition:.25s}
+.dot.done{background:var(--teal)}
+.dot.current{background:var(--copper)}
+
+.question-card{background:var(--surf);border-radius:14px;padding:22px 20px;border:1px solid var(--line);margin-bottom:16px}
+.question-meta{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--copper);text-transform:uppercase;font-weight:700;margin-bottom:12px}
+.question-text{font-family:'Newsreader',serif;font-size:20px;line-height:1.35;color:var(--cream)}
+
+.timer-bar{margin:14px 0;padding:14px 16px;background:var(--surf2);border-radius:12px}
+.timer-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.timer-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;font-weight:700}
+.timer-value{font-family:'Newsreader',serif;font-size:24px;font-weight:600;color:var(--gold)}
+.timer-track{height:5px;background:var(--bg);border-radius:3px;overflow:hidden}
+.timer-fill{height:100%;background:linear-gradient(to right, var(--teal), var(--gold), var(--copper));transition:width 1s linear;width:100%}
+.timer-bar.expired .timer-value{color:var(--copper)}
+
+.write-zone{margin-bottom:16px}
+textarea{width:100%;min-height:160px;background:var(--surf);border:2px solid var(--surf2);border-radius:12px;padding:14px 16px;color:var(--cream);font-family:'Newsreader',serif;font-size:15.5px;line-height:1.55;resize:vertical;transition:border-color .15s}
+textarea:focus{outline:none;border-color:var(--teal)}
+textarea::placeholder{color:var(--muted);font-style:italic}
+
+.notice{margin-bottom:14px;padding:10px 14px;background:rgba(232,132,92,.08);border-left:3px solid var(--copper);border-radius:0 8px 8px 0;font-size:12.5px;line-height:1.45;color:var(--cream);opacity:.85}
+.notice strong{color:var(--copper);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;display:block;margin-bottom:3px}
+
+.compare-zone{display:none;animation:slideUp .35s ease;margin-bottom:16px}
+.compare-zone.show{display:block}
+@keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.compare-box{background:var(--surf2);border-radius:12px;padding:16px;margin-bottom:12px}
+.compare-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:8px}
+.compare-box.you .compare-label{color:var(--teal)}
+.compare-box.ai .compare-label{color:var(--copper)}
+.compare-content{font-family:'Newsreader',serif;font-size:14.5px;line-height:1.55;font-style:italic;color:var(--cream)}
+.compare-content.empty{color:var(--muted);opacity:.6}
+
+.diff-note{padding:12px 14px;background:rgba(255,209,102,.08);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;font-size:13px;line-height:1.55}
+.diff-note strong{color:var(--gold);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;display:block;margin-bottom:5px}
+
+.btn{display:block;width:100%;padding:15px 18px;border-radius:12px;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:.15s;margin-top:14px}
+.btn-primary{background:var(--teal);color:var(--bg)}
+.btn-primary:active{transform:scale(.98)}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line);margin-top:10px}
+
+.results{display:none}
+.results.show{display:block}
+.result-hero{background:linear-gradient(135deg,var(--surf2),var(--surf));border-radius:18px;padding:26px 22px;margin-bottom:18px}
+.result-title{font-family:'Newsreader',serif;font-size:24px;font-weight:500;margin-bottom:10px}
+.result-body{font-size:14.5px;line-height:1.6;opacity:.92}
+
+.takeaway{background:rgba(232,132,92,.08);border-left:3px solid var(--copper);padding:16px;border-radius:0 12px 12px 0;margin-bottom:18px}
+.takeaway-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--copper);margin-bottom:6px;text-transform:uppercase;font-weight:800}
+.takeaway p{font-size:14px;line-height:1.55}
+
+.footer{margin-top:32px;padding-top:18px;border-top:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;text-align:center}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="eyebrow">PINA · CARD A06 · DISCUSSIONE</div>
+    <h1>Cognitive Audit</h1>
+    <div class="intro">Quattro domande. Per ognuna hai 90 secondi per rispondere a mente tua. Senza cercare, senza pensare a lungo. Poi vedrai cosa avrebbe risposto un'IA — e cosa hai trovato tu che l'IA non ha.</div>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <div id="round-area">
+    <div class="question-card">
+      <div class="question-meta">
+        <span id="q-label">Domanda 1 / 4</span>
+        <span id="q-type"></span>
+      </div>
+      <div class="question-text" id="q-text"></div>
+    </div>
+
+    <div class="timer-bar" id="timer-bar">
+      <div class="timer-row">
+        <span class="timer-label">▸ Tempo per scrivere</span>
+        <span class="timer-value" id="timer-value">1:30</span>
+      </div>
+      <div class="timer-track"><div class="timer-fill" id="timer-fill"></div></div>
+    </div>
+
+    <div class="notice">
+      <strong>▸ Regole</strong>
+      Scrivi solo quello che sai o pensi. Niente Google, niente IA. Va bene anche se non sai: scrivi cosa ti viene in mente, cosa ti sembrerebbe ragionevole, cosa ti incuriosisce.
+    </div>
+
+    <div class="write-zone">
+      <textarea id="user-text" placeholder="Scrivi qui la tua risposta..."></textarea>
+    </div>
+
+    <button class="btn btn-primary" id="reveal-btn" onclick="reveal()">Confronta con la risposta dell'IA</button>
+
+    <div class="compare-zone" id="compare-zone">
+      <div class="compare-box you">
+        <div class="compare-label">▸ La tua risposta</div>
+        <div class="compare-content" id="show-you"></div>
+      </div>
+      <div class="compare-box ai">
+        <div class="compare-label">▸ Quello che avrebbe scritto un'IA generalista</div>
+        <div class="compare-content" id="show-ai"></div>
+      </div>
+      <div class="diff-note">
+        <strong>▸ Da notare</strong>
+        <span id="diff-note-text"></span>
+      </div>
+      <button class="btn btn-primary" onclick="nextRound()">Avanti →</button>
+    </div>
+  </div>
+
+  <div class="results" id="results">
+    <div class="result-hero">
+      <div class="result-title">Cosa hai visto</div>
+      <div class="result-body">
+        Le IA producono risposte <strong>medie</strong> — la sintesi di milioni di testi pubblicati. Sono accurate, ordinate, complete su quasi tutto. Ma sono mediane. Quello che hai scritto tu è <strong>tuo</strong>: contiene un'esperienza, un'omissione significativa, una sfumatura. La domanda non è chi «vince» tra te e l'IA. È: cosa accade alla tua mente se smetti di scrivere queste cose con le tue parole?
+      </div>
+    </div>
+
+    <div class="takeaway">
+      <div class="takeaway-label">▸ Esperimento per i prossimi 7 giorni</div>
+      <p>Scegli una cosa che di solito chiedi all'IA — una mail, una sintesi, una decisione semplice — e per una settimana fai prima a mente tua. Poi, se vuoi, confrontati con l'IA. Non smetti di usarla, costruisci un muscolo che altrimenti si atrofizza in silenzio.</p>
+    </div>
+
+    <button class="btn btn-ghost" onclick="restart()">Ricominciare</button>
+  </div>
+
+  <div class="footer">PINA AI LITERACY · ADULT · A06</div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    type: "MEMORIA",
+    text: "Descrivi a memoria, con tre o quattro frasi, l'ultimo film o libro che ti ha davvero colpito. Cosa raccontava, cosa ti ha lasciato.",
+    ai: "Per rispondere a questa domanda dovrei prima conoscere il film o il libro che hai in mente. In generale, le opere che colpiscono tendono a esplorare temi universali come amore, perdita, identità, attraverso personaggi complessi. Spesso il loro impatto deriva da una combinazione di narrazione coinvolgente, sviluppo dei personaggi e risonanza emotiva. Posso aiutarti meglio se mi dici di quale opera si tratta.",
+    note: "L'IA non può rispondere personalmente perché non ha la tua esperienza. La tua risposta — anche se imperfetta, anche se non riesci a ricordare il titolo — contiene qualcosa che nessuna IA ha: l'effetto specifico che quella storia ha avuto su di te. Quando deleghi sempre la sintesi all'IA, perdi l'esercizio di articolare ciò che ti tocca."
+  },
+  {
+    type: "RAGIONAMENTO",
+    text: "Una persona che conosci ti dice: «Non bisogna mai prendere decisioni importanti quando si è arrabbiati». Sei d'accordo? Trova un caso in cui non vale.",
+    ai: "L'affermazione è generalmente saggia e supportata dalla psicologia: la rabbia attiva il sistema nervoso simpatico, riduce la capacità di valutazione razionale e tende a portare a decisioni impulsive. Tuttavia, ci sono eccezioni: la rabbia può rivelare valori importanti che ignoravamo, può essere il segnale che una situazione è insostenibile e va cambiata, può fornire l'energia necessaria per uscire da situazioni di stallo o abuso. In contesti di ingiustizia, la rabbia può essere un motore etico legittimo. La risposta più sfumata: la rabbia non andrebbe ignorata né lasciata decidere da sola — andrebbe ascoltata e poi valutata.",
+    note: "L'IA ti dà una risposta completa, equilibrata, in formato saggio scolastico. La tua probabilmente è più disordinata, più legata a una storia concreta — magari di te o di qualcuno che conosci. È quella concretezza che rende un pensiero veramente tuo. L'IA pensa in mediane; tu pensi in esempi."
+  },
+  {
+    type: "CREATIVITÀ",
+    text: "Inventa il nome e una breve descrizione di un negozio che ti piacerebbe esistesse nella tua città — qualcosa che non c'è ancora.",
+    ai: "Un'opzione interessante potrebbe essere «La Bottega del Tempo Lento»: uno spazio ibrido tra caffetteria, libreria indipendente e laboratorio artigianale. I clienti possono leggere, riparare piccoli oggetti con l'aiuto di artigiani locali, partecipare a workshop di scrittura o cucina, lasciare libri da scambiare. L'idea unisce il bisogno di socialità del post-pandemia con la riscoperta del fatto a mano, in un contesto urbano dove i ritmi sono spesso accelerati.",
+    note: "L'IA produce idee «generaliste» — il tipo di concetto che funziona ovunque e quindi non funziona da nessuna parte. La tua proposta probabilmente è più specifica: legata a una via, a un bisogno tuo, a una nostalgia. Quella specificità è creatività. L'IA è ottima per fare brainstorming, ma se le deleghi anche l'immaginazione, smetti di osservare la tua città."
+  },
+  {
+    type: "ETICA",
+    text: "Pensi che dovremmo poter dimenticare? Cioè: avere il diritto di rimuovere completamente vecchie informazioni su di noi dal web. Difendi la tua posizione in 3-4 frasi.",
+    ai: "La questione del «diritto all'oblio» è regolata in Europa dal GDPR (2018) e dalla sentenza Google Spain del 2014. Ci sono argomenti a favore: protezione della privacy, possibilità di reinventarsi, evitare che errori giovanili pesino a vita. E argomenti contro: il diritto di cronaca, l'integrità del record pubblico, il rischio di censura della verità. La maggior parte degli ordinamenti adotta un bilanciamento: certi soggetti (politici, criminali condannati per fatti gravi) hanno meno diritto all'oblio, persone private ne hanno di più. La tendenza è verso un equilibrio caso per caso.",
+    note: "L'IA ti dà la fotografia del dibattito: chi dice cosa, quali sono i pro e contro, qual è la posizione di compromesso. Ma non ti dice quale sia la tua posizione. La tua risposta — anche se basata su un solo argomento — afferma qualcosa. Quando ci affidiamo sempre alla sintesi neutra, smettiamo di prendere posizione. E un cittadino che non prende posizione è esattamente il prodotto migliore per chi vuole decidere al posto tuo."
+  }
+];
+
+let current = 0;
+let timerInterval = null;
+const DURATION = 90; // seconds
+
+function renderProgress(){
+  const c = document.getElementById('progress');
+  c.innerHTML = '';
+  QUESTIONS.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < current ? ' done' : i === current ? ' current' : '');
+    c.appendChild(d);
+  });
+}
+
+function renderRound(){
+  if(current >= QUESTIONS.length){ showResults(); return; }
+  const q = QUESTIONS[current];
+  document.getElementById('q-label').textContent = `Domanda ${current+1} / ${QUESTIONS.length}`;
+  document.getElementById('q-type').textContent = q.type;
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('user-text').value = '';
+  document.getElementById('user-text').disabled = false;
+  document.getElementById('compare-zone').classList.remove('show');
+  document.getElementById('reveal-btn').style.display = 'block';
+  document.getElementById('timer-bar').classList.remove('expired');
+  renderProgress();
+  startTimer();
+}
+
+function startTimer(){
+  let remaining = DURATION;
+  updateTimerDisplay(remaining);
+  if(timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    remaining--;
+    updateTimerDisplay(remaining);
+    if(remaining <= 0){
+      clearInterval(timerInterval);
+      document.getElementById('timer-bar').classList.add('expired');
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay(s){
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  document.getElementById('timer-value').textContent = `${m}:${String(sec).padStart(2,'0')}`;
+  document.getElementById('timer-fill').style.width = (s / DURATION * 100) + '%';
+}
+
+function reveal(){
+  if(timerInterval) clearInterval(timerInterval);
+  const userTxt = document.getElementById('user-text').value.trim();
+  document.getElementById('user-text').disabled = true;
+  document.getElementById('reveal-btn').style.display = 'none';
+
+  const showYou = document.getElementById('show-you');
+  if(userTxt){
+    showYou.textContent = userTxt;
+    showYou.classList.remove('empty');
+  } else {
+    showYou.textContent = '(non hai scritto nulla — è anche questa una risposta. Cosa significa per te il vuoto?)';
+    showYou.classList.add('empty');
+  }
+  document.getElementById('show-ai').textContent = QUESTIONS[current].ai;
+  document.getElementById('diff-note-text').textContent = QUESTIONS[current].note;
+  document.getElementById('compare-zone').classList.add('show');
+}
+
+function nextRound(){
+  current++;
+  if(current >= QUESTIONS.length){ showResults(); }
+  else { renderRound(); window.scrollTo({top:0, behavior:'smooth'}); }
+}
+
+function showResults(){
+  if(timerInterval) clearInterval(timerInterval);
+  document.getElementById('round-area').style.display = 'none';
+  document.getElementById('progress').style.display = 'none';
+  document.getElementById('results').classList.add('show');
+}
+
+function restart(){
+  current = 0;
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('round-area').style.display = 'block';
+  document.getElementById('progress').style.display = 'flex';
+  renderRound();
+  window.scrollTo({top:0});
+}
+
+renderRound();
+</script>
+</body>
+</html>
